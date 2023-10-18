@@ -72,26 +72,32 @@ class EntropyCalculator:
         totCount = 0
         totFreq = [0 for i in range(self.labelCount)]
 
+        value = None
         for row in self.dataset:
             v = row[self.attrNum]
-            if v in range(fromVal, toVal):
+            if value != v and v in range(fromVal, toVal):
                 info = self.valueGroup[v]
                 attrEntSum += info.count * info.entropy
                 totCount += info.count
                 for i in range(self.labelCount):
                     totFreq[i] += info.labelFreq[i]
+                value = v
 
         totEntropy = 0
         for tf in totFreq:
-            prob = tf/totCount
-            totEntropy -= prob * np.log2(prob)
+            if tf > 0:
+                prob = tf/totCount
+                totEntropy -= prob * np.log2(prob)
 
         # IG = H(D) - sum(HD'attr)
         return totEntropy - attrEntSum/totCount
         
+
 # test value entropy
-# d = np.array([[0,3], [1,1], [2,1], [2,2]])
-# ec = EntropyCalculator(d, 4, 0)
-# ec.groupingSplittingColumn()
-# for v in ec.valueGroup.values():
-#     v.show()
+
+d = np.array([[0,3], [1,1], [2,1], [2,2]])
+ec = EntropyCalculator(d, 4, 0)
+ec.groupingSplittingColumn()
+for v in ec.valueGroup.values():
+    v.show()
+print(ec.columnRangeInformationGain(0,3))
