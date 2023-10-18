@@ -65,17 +65,19 @@ class EntropyCalculator:
         for valueInfo in self.valueGroup.values():
             valueInfo.valueEntropy()
 
-    def columnRangeInformationGain(self, fromVal, toVal):
-        # include fromVal, exclude toVal
+    def colRangeIG(self, valRange):
+        # if valRange is None, calculate the entire column
         # find the information gain on a subset of values (esplitted)
         attrEntSum = 0
         totCount = 0
         totFreq = [0 for i in range(self.labelCount)]
+        numRows = 0
 
         value = None
         for row in self.dataset:
             v = row[self.attrNum]
-            if value != v and v in range(fromVal, toVal):
+            numRows += 1
+            if value != v and (valRange is None or v in range(valRange[0], valRange[1])):
                 info = self.valueGroup[v]
                 attrEntSum += info.count * info.entropy
                 totCount += info.count
@@ -90,14 +92,14 @@ class EntropyCalculator:
                 totEntropy -= prob * np.log2(prob)
 
         # IG = H(D) - sum(HD'attr)
-        return totEntropy - attrEntSum/totCount
+        return totEntropy - attrEntSum/totCount, numRows
         
 
 # test value entropy
 
-d = np.array([[0,3], [1,1], [2,1], [2,2]])
-ec = EntropyCalculator(d, 4, 0)
-ec.groupingSplittingColumn()
-for v in ec.valueGroup.values():
-    v.show()
-print(ec.columnRangeInformationGain(0,3))
+# d = np.array([[0,3], [1,1], [2,1], [2,2]])
+# ec = EntropyCalculator(d, 4, 0)
+# ec.groupingSplittingColumn()
+# for v in ec.valueGroup.values():
+#     v.show()
+# print(ec.colRangeIG(0,3))
