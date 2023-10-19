@@ -13,6 +13,11 @@ class Node:
         self.right = right
 
 
+def sortColumn(dataset, attrNum):
+    # sort the entire dataset on one attribute
+    sortedDataset = dataset[dataset[:,attrNum].argsort()]
+    return sortedDataset
+
 def countLabels(allData):
     labels = []
     for row in allData:

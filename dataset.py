@@ -29,11 +29,6 @@ class EntropyCalculator:
         self.labelCount = labelCount    # in this dataset is 4
         self.valueGroup = {}            # value: ValueInfo (dictionary)
         self.splitPoints = []           # which value needs splitting (contains different labels)
-
-    def sortColumn(self):
-        # sort the entire dataset on one attribute
-        sortedDataset=self.dataset[self.dataset[:,self.attrNum].argsort()]
-        return sortedDataset
         
     
     def groupingSplittingColumn(self, allData):
