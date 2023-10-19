@@ -27,10 +27,10 @@ def countLabels(allData):
     return len(labels)
 
 def createCalculators(allData):
+    labelCount = countLabels(allData)
     for attrNum in range(len(allData[0])-1):
-        entCalc = EntropyCalculator(countLabels(allData), attrNum)
-        entCalc.sortColumn()
-        entCalc.groupingSplittingColumn(allData)
+        entCalc = EntropyCalculator(labelCount, attrNum)
+        entCalc.groupingSplittingColumn(sortColumn(allData, attrNum))
         calculators.append(entCalc)
     
 def findOptimalSplit(partData):
@@ -40,33 +40,35 @@ def findOptimalSplit(partData):
     rightFinder = None
 
     for entCalc in calculators:
-        rf = entCalc.findOptimum(partData)
+        dataSorted = sortColumn(partData, entCalc.attrNum)
+        rf = entCalc.findOptimum(dataSorted)
         ig = rf.prefixIG()
         if ig > maxIG:
             maxIG = ig
             maxAttrEC = entCalc
             rightFinder = rf
+            partData = dataSorted
 
     # find optimal split within optimal attribute
     maxIG = 0
-    splitPoint = 0
+    rowBound = 0
 
     leftFinder = OptimumFinder(0, 0, [0 for i in range(maxAttrEC.labelCount)])
-    rowBound = 0
+    rowNum = 0
     for split in maxAttrEC.splitPoints:
-        if split not in range(partData[0][maxAttrEC.attrNum], partData[-1][maxAttrEC.attrNum]):
+        if split < partData[0][maxAttrEC.attrNum] or split >= partData[-1][maxAttrEC.attrNum]:
             continue
         
         value = None
         while True:
-            v = partData[rowBound][maxAttrEC.attrNum]
+            v = partData[rowNum][maxAttrEC.attrNum]
             if v < split:
                 if v != value:
                     info = maxAttrEC.valueGroup[v]
                     leftFinder.update(info, 1)
                     rightFinder.update(info, -1)
                     value = v
-                rowBound += 1
+                rowNum += 1
             else:
                 break              
 
@@ -75,8 +77,8 @@ def findOptimalSplit(partData):
         splitIG = (leftIG * leftFinder.valueCount + rightIG * rightFinder.valueCount)/len(partData)
         if splitIG > maxIG:
             maxIG = splitIG
-            splitPoint = split
-    return splitPoint
+            rowBound = rowNum
+    return rowBound
 
 
 def decisionTreeCreating(dataset,depth):
@@ -89,4 +91,7 @@ def decisionTreeCreating(dataset,depth):
     else:
         split=findOptimalSplit(dataset,0,dataset.shape[0])
         actualnode=Node()
-    
+
+
+createCalculators(cleanData)
+print(findOptimalSplit(cleanData))    

@@ -34,13 +34,13 @@ class EntropyCalculator:
     def groupingSplittingColumn(self, allData):
         # create valueGroup dictionary and find the splitting points in one loop
         val = allData[0][self.attrNum]
-        label = allData[0][-1]
+        label = int(allData[0][-1])
         info = ValueInfo(self.labelCount)
         info.labelFreq[label-1] = 1
         self.valueGroup[val] = info
         for row in allData[1:]:
             v = row[self.attrNum]    # value
-            l = row[-1]         # label
+            l = int(row[-1])         # label
             if v in self.valueGroup:
                 self.valueGroup[v].labelFreq[l-1] += 1
             else:
@@ -67,7 +67,7 @@ class EntropyCalculator:
         totFreq = [0 for i in range(self.labelCount)]
 
         value = None
-        for row in self.partData:
+        for row in partData:
             v = row[self.attrNum]
             if value != v:
                 info = self.valueGroup[v]
@@ -76,7 +76,7 @@ class EntropyCalculator:
                     totFreq[i] += info.labelFreq[i]
                 value = v
 
-        return OptimumFinder(attrEntSum, len(self.partData), totFreq)
+        return OptimumFinder(attrEntSum, len(partData), totFreq)
         
 class OptimumFinder:
     def __init__(self, entropySum, valueCount, labelFreq):
@@ -96,7 +96,7 @@ class OptimumFinder:
     
     def update(self, info, fac):
         self.entropySum += fac * info.count * info.entropy
-        for i in range(info.labelCount):
+        for i in range(len(self.labelFreq)):
             self.labelFreq[i] += fac*info.labelFreq[i]
         self.valueCount += fac * info.count
         
