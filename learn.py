@@ -51,8 +51,18 @@ def findOptimalSplit(dataset, fromRow, untilRow):
     return splitPoint
 
     
-def decisionTreeLearning(dataset, rowRange, depth):
+def decisionTreeLearning(dataset, rowRange, depth,node):
+   
     return
 
+def decisionTreeCreating(dataset,depth):
+    
+    actualnode=Node(None,dataset,None,None)
 
-
+    allLabels=actualnode.val[:,-1]#Get the column with all the labels
+    if np.all(allLabels==allLabels[0]):#Checks if all of the labels are the same
+        return (actualnode,depth)
+    else:
+        split=findOptimalSplit(dataset,0,dataset.shape[0])
+        actualnode=Node()
+    

@@ -33,7 +33,9 @@ class EntropyCalculator:
 
     def sortColumn(self):
         # sort the entire dataset on one attribute
-        return
+        sortedDataset=self.dataset[self.dataset[:,self.attrNum].argsort()]
+        return sortedDataset
+        
     
     def groupingSplittingColumn(self):
         # create valueGroup dictionary and find the splitting points in one loop
