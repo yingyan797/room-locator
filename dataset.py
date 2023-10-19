@@ -24,26 +24,20 @@ class ValueInfo:
         print(self.labelFreq, self.entropy)
 
 class EntropyCalculator:
-    def __init__(self, dataset, labelCount, attrNum):
-        self.dataset = dataset
+    def __init__(self, labelCount, attrNum):
+        self.attrNum = attrNum
         self.labelCount = labelCount    # in this dataset is 4
-        self.attrNum = attrNum          # which attrbute (1-7) is being calculated
         self.valueGroup = {}            # value: ValueInfo (dictionary)
         self.splitPoints = []           # which value needs splitting (contains different labels)
-
-    def sortColumn(self):
-        # sort the entire dataset on one attribute
-        return
-    
-    def groupingSplittingColumn(self):
+   
+    def groupingSplittingColumn(self, allData):
         # create valueGroup dictionary and find the splitting points in one loop
-        self.valueGroup = {}
-        val = self.dataset[0][self.attrNum]
-        label = self.dataset[0][-1]
+        val = allData[0][self.attrNum]
+        label = allData[0][-1]
         info = ValueInfo(self.labelCount)
         info.labelFreq[label-1] = 1
         self.valueGroup[val] = info
-        for row in self.dataset[1:]:
+        for row in allData[1:]:
             v = row[self.attrNum]    # value
             l = row[-1]         # label
             if v in self.valueGroup:
@@ -65,33 +59,47 @@ class EntropyCalculator:
         for valueInfo in self.valueGroup.values():
             valueInfo.valueEntropy()
     
-    def colRangeIG(self, fromRow, untilRow):
+    def findOptimum(self, partData):
         # include fromRow, exclude untilRow
         # find the information gain on a subset of values (esplitted)
         attrEntSum = 0
-        totCount = 0
         totFreq = [0 for i in range(self.labelCount)]
 
         value = None
-        for row in self.dataset[fromRow:untilRow]:
+        for row in self.partData:
             v = row[self.attrNum]
             if value != v:
                 info = self.valueGroup[v]
                 attrEntSum += info.count * info.entropy
-                totCount += info.count
                 for i in range(self.labelCount):
                     totFreq[i] += info.labelFreq[i]
                 value = v
 
+        return OptimumFinder(attrEntSum, len(self.partData), totFreq)
+        
+class OptimumFinder:
+    def __init__(self, entropySum, valueCount, labelFreq):
+        self.entropySum = entropySum
+        self.valueCount = valueCount
+        self.labelFreq = labelFreq
+
+    def prefixIG(self):
         totEntropy = 0
-        for tf in totFreq:
+        for tf in self.labelFreq:
             if tf > 0:
-                prob = tf/totCount
+                prob = tf/self.valueCount
                 totEntropy -= prob * np.log2(prob)
 
         # IG = H(D) - sum(HD'attr)
-        return totEntropy - attrEntSum/totCount
+        return totEntropy - self.entropySum/self.valueCount
+    
+    def update(self, info, fac):
+        self.entropySum += fac * info.count * info.entropy
+        for i in range(info.labelCount):
+            self.labelFreq[i] += fac*info.labelFreq[i]
+        self.valueCount += fac * info.count
         
+
 
 # test value entropy
 
@@ -101,3 +109,4 @@ class EntropyCalculator:
 # for v in ec.valueGroup.values():
 #     v.show()
 # print(ec.colRangeIG(0,3))
+

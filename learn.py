@@ -1,5 +1,5 @@
 import numpy as np
-from dataset import EntropyCalculator
+from dataset import EntropyCalculator, OptimumFinder
 
 cleanData = np.loadtxt("wifi_db/clean_dataset.txt")
 noisyDate = np.loadtxt("wifi_db/noisy_dataset.txt")
@@ -12,46 +12,69 @@ class Node:
         self.left = left
         self.right = right
 
-def countLabels(dataset):
+
+def countLabels(allData):
     labels = []
-    for row in dataset:
+    for row in allData:
         l = row[-1]
         if l not in labels:
             labels.append(l)
     return len(labels)
 
-def createCalculators(dataset):
-    for attrNum in range(len(dataset[0])-1):
-        entCalc = EntropyCalculator(dataset, countLabels(dataset), attrNum)
+def createCalculators(allData):
+    for attrNum in range(len(allData[0])-1):
+        entCalc = EntropyCalculator(countLabels(allData), attrNum)
         entCalc.sortColumn()
-        entCalc.groupingSplittingColumn()
+        entCalc.groupingSplittingColumn(allData)
         calculators.append(entCalc)
     
-def findOptimalSplit(dataset, fromRow, untilRow):
+def findOptimalSplit(partData):
     # find optimal attribute number and create a calculator for it
     maxAttrEC = None
     maxIG = 0
+    rightFinder = None
 
     for entCalc in calculators:
-        ig = entCalc.colRangeIG(fromRow, untilRow)
+        rf = entCalc.findOptimum(partData)
+        ig = rf.prefixIG()
         if ig > maxIG:
             maxIG = ig
             maxAttrEC = entCalc
+            rightFinder = rf
 
     # find optimal split within optimal attribute
     maxIG = 0
     splitPoint = 0
+
+    leftFinder = OptimumFinder(0, 0, [0 for i in range(maxAttrEC.labelCount)])
+    rowBound = 0
     for split in maxAttrEC.splitPoints:
-        leftIG, leftCount = maxAttrEC.colRangeIG((startValue, split))
-        rightIG, rightCount = maxAttrEC.colRangeIG(split, endValue)
-        splitIG = (leftIG * leftCount + rightIG * rightCount)/len(dataset)
+        if split not in range(partData[0][maxAttrEC.attrNum], partData[-1][maxAttrEC.attrNum]):
+            continue
+        
+        value = None
+        while True:
+            v = partData[rowBound][maxAttrEC.attrNum]
+            if v < split:
+                if v != value:
+                    info = maxAttrEC.valueGroup[v]
+                    leftFinder.update(info, 1)
+                    rightFinder.update(info, -1)
+                    value = v
+                rowBound += 1
+            else:
+                break              
+
+        leftIG = leftFinder.prefixIG()
+        rightIG = rightFinder.prefixIG()
+        splitIG = (leftIG * leftFinder.valueCount + rightIG * rightFinder.valueCount)/len(partData)
         if splitIG > maxIG:
             maxIG = splitIG
             splitPoint = split
     return splitPoint
 
     
-def decisionTreeLearning(dataset, rowRange, depth):
+def decisionTreeLearning(allData, rowRange, depth):
     return
 
 
