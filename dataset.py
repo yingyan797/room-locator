@@ -64,20 +64,18 @@ class EntropyCalculator:
         # calculate the entropy for each value
         for valueInfo in self.valueGroup.values():
             valueInfo.valueEntropy()
-
-    def colRangeIG(self, valRange):
-        # if valRange is None, calculate the entire column
+    
+    def colRangeIG(self, fromRow, untilRow):
+        # include fromRow, exclude untilRow
         # find the information gain on a subset of values (esplitted)
         attrEntSum = 0
         totCount = 0
         totFreq = [0 for i in range(self.labelCount)]
-        numRows = 0
 
         value = None
-        for row in self.dataset:
+        for row in self.dataset[fromRow:untilRow]:
             v = row[self.attrNum]
-            numRows += 1
-            if value != v and (valRange is None or v in range(valRange[0], valRange[1])):
+            if value != v:
                 info = self.valueGroup[v]
                 attrEntSum += info.count * info.entropy
                 totCount += info.count
@@ -92,7 +90,7 @@ class EntropyCalculator:
                 totEntropy -= prob * np.log2(prob)
 
         # IG = H(D) - sum(HD'attr)
-        return totEntropy - attrEntSum/totCount, numRows
+        return totEntropy - attrEntSum/totCount
         
 
 # test value entropy
