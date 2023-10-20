@@ -93,12 +93,25 @@ class EntropyCalculator:
 
         # IG = H(D) - sum(HD'attr)
         return totEntropy - attrEntSum/totCount
-        
+    
+
+
+    def getsplitsDataset(self,split_point):#Get the left and right datasets from a splitting point
+        set=self.dataset
+        column=self.attrNum#Get which column we have to compare with our split_point
+       
+        left_set=set[set[:,column]<=split_point]
+        right_set=set[set[:,column]>split_point]
+        return (np.array(left_set),np.array(right_set))
 
 # test value entropy
 
-# d = np.array([[0,3], [1,1], [2,1], [2,2]])
-# ec = EntropyCalculator(d, 4, 0)
+#d = np.array([[0,3], [1,1], [2,1], [2,2]])
+#ec = EntropyCalculator(d, 4, 0)
+#left,right=ec.getsplitsDataset(1)
+#print("original",d)
+#print("right",right)
+#print("left",left)
 # ec.groupingSplittingColumn()
 # for v in ec.valueGroup.values():
 #     v.show()
