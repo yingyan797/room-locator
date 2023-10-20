@@ -33,12 +33,9 @@ class EntropyCalculator:
     
     def groupingSplittingColumn(self, allData):
         # create valueGroup dictionary and find the splitting points in one loop
-        val = allData[0][self.attrNum]
-        label = int(allData[0][-1])
-        info = ValueInfo(self.labelCount)
-        info.labelFreq[label-1] = 1
-        self.valueGroup[val] = info
-        for row in allData[1:]:
+        val = None
+        label = None
+        for row in allData:
             v = row[self.attrNum]    # value
             l = int(row[-1])         # label
             if v in self.valueGroup:
@@ -47,18 +44,18 @@ class EntropyCalculator:
                 info = ValueInfo(self.labelCount)
                 info.labelFreq[l-1] = 1
                 self.valueGroup[v] = info
-            if l != label:
-                split = v
-                if split != val:
-                    split = (split+val)/2
-                if split not in self.splitPoints:
-                    self.splitPoints.append(split)
+            if v != val:
+                val = v
                 label = l
-            val = v
+            elif l != label:
+                if v not in self.splitPoints:
+                    print(l, label, v)
+                    self.splitPoints.append(v)
+                    label = l
 
         # calculate the entropy for each value
-        for valueInfo in self.valueGroup.values():
-            valueInfo.valueEntropy()
+        for (k,v) in self.valueGroup.items():
+            v.valueEntropy()
     
     def findOptimum(self, partData):
         # include fromRow, exclude untilRow
@@ -76,7 +73,7 @@ class EntropyCalculator:
                     totFreq[i] += info.labelFreq[i]
                 value = v
 
-        return OptimumFinder(attrEntSum, len(partData), totFreq)
+        return OptimumFinder(attrEntSum, sum(totFreq), totFreq)
         
 class OptimumFinder:
     def __init__(self, entropySum, valueCount, labelFreq):
@@ -85,6 +82,8 @@ class OptimumFinder:
         self.labelFreq = labelFreq
 
     def prefixIG(self):
+        if self.entropySum == 0:
+            return 0
         totEntropy = 0
         for tf in self.labelFreq:
             if tf > 0:
@@ -92,8 +91,6 @@ class OptimumFinder:
                 totEntropy -= prob * np.log2(prob)
 
         # IG = H(D) - sum(HD'attr)
-        if self.entropySum == 0:
-            return totEntropy
         return totEntropy - self.entropySum/self.valueCount
     
     def update(self, info, fac):

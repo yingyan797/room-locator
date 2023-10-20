@@ -56,6 +56,7 @@ def findOptimalSplit(partData):
     # find optimal split within optimal attribute
     maxIG = 0
     rowBound = 0
+    splitValue = 0
 
     leftFinder = OptimumFinder(0, 0, [0 for i in range(maxAttrEC.labelCount)])
     rowNum = 0
@@ -82,11 +83,11 @@ def findOptimalSplit(partData):
         if splitIG > maxIG:
             maxIG = splitIG
             rowBound = rowNum
-    return rowBound, maxAttrEC.attrNum, partData[rowBound]
+            splitValue = split
+    return rowBound, maxAttrEC.attrNum, splitValue
 
 
-def decisionTreeCreating(dataset,depth):
-    
+def decisionTreeCreating(dataset,depth):    
     allLabels = dataset[:,-1]#Get the column with all the labels
     if np.all(allLabels==allLabels[0]):#Checks if all of the labels are the same
         return (Node(None, allLabels[0], None, None),depth)
