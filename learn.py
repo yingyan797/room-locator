@@ -12,6 +12,11 @@ class Node:
         self.left = left
         self.right = right
 
+    def show(self):
+        if self.left is None and self.right is None:
+            return "Then the label is "+self.val
+        return "If attribute "+self.attr+" <= "+self.val+" {\n  "+self.left.show()+"\n}\n"+"otherwise (attribute "+self.attr+") > "+self.val+" {\n  "+self.left.show()+"\n}\n"
+
 
 def sortColumn(dataset, attrNum):
     # sort the entire dataset on one attribute
@@ -38,7 +43,6 @@ def findOptimalSplit(partData):
     maxAttrEC = None
     maxIG = 0
     rightFinder = None
-
     for entCalc in calculators:
         dataSorted = sortColumn(partData, entCalc.attrNum)
         rf = entCalc.findOptimum(dataSorted)
@@ -56,7 +60,7 @@ def findOptimalSplit(partData):
     leftFinder = OptimumFinder(0, 0, [0 for i in range(maxAttrEC.labelCount)])
     rowNum = 0
     for split in maxAttrEC.splitPoints:
-        if split < partData[0][maxAttrEC.attrNum] or split >= partData[-1][maxAttrEC.attrNum]:
+        if split <= partData[0][maxAttrEC.attrNum] or split >= partData[-1][maxAttrEC.attrNum]:
             continue
         
         value = None
@@ -78,20 +82,24 @@ def findOptimalSplit(partData):
         if splitIG > maxIG:
             maxIG = splitIG
             rowBound = rowNum
-    return rowBound
+    return rowBound, maxAttrEC.attrNum, partData[rowBound]
 
 
 def decisionTreeCreating(dataset,depth):
     
-    actualnode=Node(None,dataset,None,None)
-
-    allLabels=actualnode.val[:,-1]#Get the column with all the labels
+    allLabels = dataset[:,-1]#Get the column with all the labels
     if np.all(allLabels==allLabels[0]):#Checks if all of the labels are the same
-        return (actualnode,depth)
+        return (Node(None, allLabels[0], None, None),depth)
     else:
-        split=findOptimalSplit(dataset,0,dataset.shape[0])
-        actualnode=Node()
-
+        rowBound, attrNum, splitValue = findOptimalSplit(dataset)
+        splitNode = Node(attrNum, splitValue, None, None)
+        ldata = dataset[:rowBound]
+        rdata = dataset[rowBound:]
+        splitNode.left, ldepth = decisionTreeCreating(ldata, depth+1)
+        splitNode.right, rdepth = decisionTreeCreating(rdata, depth+1)
+        return splitNode, max(ldepth, rdepth)
 
 createCalculators(cleanData)
-print(findOptimalSplit(cleanData))    
+print(findOptimalSplit(cleanData), "\nDecision tree learning:\n")
+tree, d = decisionTreeCreating(cleanData, 0)
+print(tree.show())    

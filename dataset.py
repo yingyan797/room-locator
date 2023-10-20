@@ -92,6 +92,8 @@ class OptimumFinder:
                 totEntropy -= prob * np.log2(prob)
 
         # IG = H(D) - sum(HD'attr)
+        if self.entropySum == 0:
+            return totEntropy
         return totEntropy - self.entropySum/self.valueCount
     
     def update(self, info, fac):
