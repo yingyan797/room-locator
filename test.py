@@ -2,7 +2,7 @@ import numpy as np
 import os
 import sys
 
-filepath=clean_dataset.txt
+filepath='./wifi_db/clean_dataset.txt'
 x=[]
 
 for line in open(filepath):
