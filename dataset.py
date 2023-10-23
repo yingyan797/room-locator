@@ -8,7 +8,21 @@ class ValueInfo:
         self.labelFreq = [0 for i in range(labelCount)]
         self.count = count
         self.entropy = entropy
+        self.pure = None
 
+    def isPure(self):
+        if self.pure != None:
+            return self.pure
+        numDistinct = 0
+        label = None
+        for i in range(len(self.labelFreq)):
+            if self.labelFreq[i] > 0:
+                numDistinct += 1
+                label = i+1
+            if numDistinct > 1:
+                return -1
+        return label
+    
     def valueEntropy(self):
         self.count = sum(self.labelFreq)
         ent = 0
@@ -29,33 +43,29 @@ class EntropyCalculator:
         self.labelCount = labelCount    # in this dataset is 4
         self.valueGroup = {}            # value: ValueInfo (dictionary)
         self.splitPoints = []           # which value needs splitting (contains different labels)
-        
-    
-    def groupingSplittingColumn(self, allData):
+          
+    def groupSplitValues(self, allData):
         # create valueGroup dictionary and find the splitting points in one loop
         val = None
-        label = None
         for row in allData:
             v = row[self.attrNum]    # value
             l = int(row[-1])         # label
-            if v in self.valueGroup:
+            if v == val:
                 self.valueGroup[v].labelFreq[l-1] += 1
             else:
                 info = ValueInfo(self.labelCount)
                 info.labelFreq[l-1] = 1
                 self.valueGroup[v] = info
-            if v != val:
+                if val != None:
+                    self.valueGroup[val].valueEntropy()
                 val = v
-                label = l
-            elif l != label:
-                if v not in self.splitPoints:
-                    print(l, label, v)
-                    self.splitPoints.append(v)
-                    label = l
-
-        # calculate the entropy for each value
-        for (k,v) in self.valueGroup.items():
-            v.valueEntropy()
+        
+        valsInfo = list(self.valueGroup.items())
+        i = 0
+        while i < len(valsInfo)-1:
+            if valsInfo[i][1].isPure() < 0 or valsInfo[i+1][1].isPure() != valsInfo[i][1].isPure():
+                self.splitPoints.append(valsInfo[i+1][0])
+            i += 1
     
     def findOptimum(self, partData):
         # include fromRow, exclude untilRow
