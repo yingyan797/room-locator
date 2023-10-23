@@ -37,6 +37,7 @@ class ValueInfo:
         # for testing debugging only
         print(self.labelFreq, self.entropy)
 
+# Each entropy calculator is corresponded to one attribute and each calculates the entropy of that attribute
 class EntropyCalculator:
     def __init__(self, labelCount, attrNum):
         self.attrNum = attrNum
@@ -108,7 +109,7 @@ class OptimumFinder:
         for i in range(len(self.labelFreq)):
             self.labelFreq[i] += fac*info.labelFreq[i]
         self.valueCount += fac * info.count
-        
+
 
 
 # test value entropy
