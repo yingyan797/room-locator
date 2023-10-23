@@ -69,3 +69,17 @@ def decision_tree_learning(dataset, depth):
         return Node(None, allLabels[0], None, None), depth
     # TODO: Find optimal spliting point, Store spliting point as node, Split the data into 2 datasets, repeat until
     #  reach depth
+
+
+def fit(dataset, depth):
+    decision_tree = decision_tree_learning(dataset, depth)
+    # TODO: Visualize tree
+    return decision_tree
+
+def predict():
+    # TODO:
+    return
+
+def cross_validation():
+    #TODO:
+    return
