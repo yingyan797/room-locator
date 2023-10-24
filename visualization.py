@@ -40,13 +40,13 @@ class Tree_Visualizer:
         plt.axis('off')
         ax.set_aspect('equal')
         self.plot_tree(self.tree, level=5, position=0)
-        plt.savefig("mainT.png")
+        plt.savefig("./plots/mainT.png")
         for index, t in enumerate(self.subtree_list):
             fig, ax = plt.subplots(figsize=(30, 30))
             plt.axis('off')
             ax.set_aspect('equal')
             self.plot_tree(t, level=5, position=0)
-            plt.savefig(f"subT{index+1}.png")
+            plt.savefig(f"./plots/subT{index+1}.png")
 
 
 if __name__ == '__main__':
