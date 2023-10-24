@@ -11,3 +11,6 @@ for line in open(filepath):
             x.append(list(map(float, row)))
             
 x=np.array(x)
+
+def evaluate(test_dataset,root):
+      
