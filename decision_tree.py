@@ -1,12 +1,10 @@
 import numpy as np
 from model import ValueInfo, OptimumFinder
 
-# read dataset to np_array
 cleanData = np.loadtxt("wifi_db/clean_dataset.txt")
 noisyData = np.loadtxt("wifi_db/noisy_dataset.txt")
 data_shape = cleanData.shape
 attr_count = data_shape[1] - 1
-
 
 # define the data structure of the decision tree
 class Node:
@@ -115,27 +113,26 @@ def split_dataset(dataset, attr, split):  # Get the left and right datasets from
     return np.array(left_set), np.array(right_set)
 
 
-def decision_tree_learning(dataset, depth):
+def decision_tree_learning(dataset, depth, maxdepth):
     all_labels = dataset[:, -1]  # Get the column with all the labels
-    if np.all(all_labels == all_labels[0]) or depth >= 100:  # Checks if all of the labels are the same
+    if np.all(all_labels == all_labels[0]) or depth > maxdepth:
+        # Checks if all the labels are the same or exceed max depth
         return Node(None, all_labels[0], None, None), depth
     else:
         attr, split = find_optimal_split_point(dataset)
         split_node = Node(attr, split, None, None)
         ldata, rdata = split_dataset(dataset, attr, split)
-        split_node.left, ldepth = decision_tree_learning(ldata, depth + 1)
-        split_node.right, rdepth = decision_tree_learning(rdata, depth + 1)
+        split_node.left, ldepth = decision_tree_learning(ldata, depth + 1, 10)
+        split_node.right, rdepth = decision_tree_learning(rdata, depth + 1, 10)
         return split_node, max(ldepth, rdepth)
 
 
 def fit(dataset, depth):
-    decision_tree = decision_tree_learning(dataset, depth)
-    # TODO: Visualize tree
+    decision_tree = decision_tree_learning(dataset, depth, 10)
     return decision_tree
 
 
 def predict(tree, dataset):
-    # TODO:
     # Return array of class labels predicted using the input decision tree
     # Maintains same order
     labels = np.zeros(len(dataset))
@@ -152,13 +149,13 @@ def predict(tree, dataset):
 
 
 def cross_validation(dataset):
-    # TODO:
     # Suffle dataset to maintain randomness
     nb_folds = 10
     np.random.shuffle(dataset)
     # Split dataset into 10 folds
     folds = np.array_split(dataset, 10)
     totalAccuracy, totalRecall, totalPrecision, totalF1 = 0, 0, 0, 0
+    max = (-1, None)
     # Iterate 10 times, and each time do:
     for i in range(len(folds)):
         # Take 1 fold out as testing set
@@ -166,12 +163,16 @@ def cross_validation(dataset):
         remaining_folds = folds[:i] + folds[i + 1:]
         training_set = remaining_folds[0]
         # Build decision tree based on training set (remaining 9 folds)
-        tree, depth = decision_tree_learning(training_set, 0)
+        tree, depth = decision_tree_learning(training_set, 0, 10)
         # Store evaluation metrics for each iteration
         actual_class_labels = testing_set[:, -1]
         predicted_class_labels = predict(tree, testing_set)
         matrix = confusion_matrix(predicted_class_labels, actual_class_labels)
-        totalAccuracy += accuracy(matrix, len(predicted_class_labels))
+        curr_acc = accuracy(matrix, len(predicted_class_labels))
+        totalAccuracy += curr_acc
+        #record the most accurate tree and return the result and the tree
+        if curr_acc >= max[0]:
+            max = (curr_acc, tree)
         precision, recall, f1 = prf_metrics(matrix)
         totalPrecision += precision
         totalRecall += recall
@@ -181,7 +182,7 @@ def cross_validation(dataset):
     print("Recall:", totalRecall / nb_folds * 100, "%")
     print("Precision:", totalPrecision / nb_folds * 100, "%")
     print("F1-measure:", totalF1 / nb_folds * 100, "%")
-    return
+    return max
 
 
 def confusion_matrix(predicted, actual):
@@ -212,12 +213,3 @@ def prf_metrics(matrix):
         totalPrecision += precision
         totalF1 += 2 * precision * recall / (precision + recall)
     return totalPrecision / label_count, totalRecall / label_count, totalF1 / label_count
-
-
-# print(find_optimal_split_point(cleanData))
-# tree, depth = decision_tree_learning(cleanData, 0)
-# print(tree.show(), "depth", depth)
-print("Clean Data:")
-cross_validation(cleanData)
-print("Noisy Data:")
-cross_validation(noisyData)

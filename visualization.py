@@ -18,7 +18,6 @@ class Tree_Visualizer:
                 plt.plot([parent_coords[0], node.x], [parent_coords[1], node.y], '-',
                          color=color[level % len(color)])
             if level < 1 and (node.attr is not None):
-                print (node.attr)
                 self.subtree_list.append(node)
                 plt.text(node.x, node.y, f"subT{len(self.subtree_list)}", ha='center',
                          bbox={"boxstyle": "round", "pad": 0.4, "facecolor": "w", "edgecolor": "k"}, fontsize="small")
@@ -51,6 +50,6 @@ class Tree_Visualizer:
 
 if __name__ == '__main__':
     cleanData = np.loadtxt("wifi_db/clean_dataset.txt")
-    tree, depth = decision_tree_learning(cleanData, 0)
+    tree, depth = decision_tree_learning(cleanData, 0, 10)
     visualizer = Tree_Visualizer(tree)
     visualizer.visualize()
