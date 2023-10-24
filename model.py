@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class ValueInfo:
     # storing the frequency count of each label appears in one value, as well as its entropy
     # "value" takes the form of x1 = 61, 60, 75 etc. equivalent to "sunny", "windy" in tennis example
@@ -17,13 +18,14 @@ class ValueInfo:
         for i in range(len(self.frequency)):
             if self.frequency[i] > 0:
                 num_distinct += 1
-                label = i+1
+                label = i + 1
             if num_distinct > 1:
                 self.unique = -1
                 return self.unique
         self.unique = label
         return self.unique
-            
+
+
 class OptimumFinder:
     def __init__(self, size, prefix_freq):
         self.size = size
@@ -33,13 +35,11 @@ class OptimumFinder:
         ent = 0
         for pf in self.prefix_freq:
             if pf > 0:
-                prob = pf/self.size
+                prob = pf / self.size
                 ent -= prob * np.log2(prob)
         return ent
 
     def update(self, info, fac):
         for i in range(len(self.prefix_freq)):
-            self.prefix_freq[i] += fac*info.frequency[i]
+            self.prefix_freq[i] += fac * info.frequency[i]
         self.size += fac * info.count
-
-

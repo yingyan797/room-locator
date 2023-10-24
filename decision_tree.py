@@ -22,7 +22,7 @@ class Node:
         return "If attribute " + str(self.attr) + " <= " + str(
             self.val) + " {\n  " + self.left.show() + "\n}\n" + "otherwise (attribute " + str(self.attr) + ") > " + str(
             self.val) + " {\n  " + self.right.show()
-            
+
     def isLeaf(self):
         if self.right == None and self.left == None:
             return True
@@ -66,11 +66,11 @@ def find_optimal_split_point(dataset):
             label_frequency[label - 1] += 1  # calculate the frequency of this label
             if v == value:
                 info = value_group[-1][1]
-                info.frequency[label-1] += 1
+                info.frequency[label - 1] += 1
                 info.count += 1
             else:
                 info = ValueInfo(label_count)
-                info.frequency[label-1] = 1
+                info.frequency[label - 1] = 1
                 info.count = 1
                 if len(value_group) >= 2:
                     info2 = value_group[-2][1]
@@ -89,7 +89,7 @@ def find_optimal_split_point(dataset):
         right_finder = OptimumFinder(len(sorted_dataset), label_frequency)
         if min_remainder is None:
             min_remainder = right_finder.entropy()
-        
+
         i = 0
         while len(split_points) > 0:
             (value, info) = value_group[i]
@@ -99,7 +99,8 @@ def find_optimal_split_point(dataset):
                 i += 1
             else:
                 split = split_points.pop(0)
-                rem = (left_finder.entropy()*left_finder.size + right_finder.entropy()*right_finder.size) / len(sorted_dataset)
+                rem = (left_finder.entropy() * left_finder.size + right_finder.entropy() * right_finder.size) / len(
+                    sorted_dataset)
                 # print(column, split, rem)
                 if rem < min_remainder:
                     min_remainder = rem
@@ -107,10 +108,12 @@ def find_optimal_split_point(dataset):
                     max_IG_split = split
     return max_IG_attr, max_IG_split
 
-def split_dataset(dataset, attr, split):#Get the left and right datasets from a splitting point
-        left_set=dataset[dataset[:,attr] < split]
-        right_set=dataset[dataset[:,attr] >= split]
-        return np.array(left_set), np.array(right_set)
+
+def split_dataset(dataset, attr, split):  # Get the left and right datasets from a splitting point
+    left_set = dataset[dataset[:, attr] < split]
+    right_set = dataset[dataset[:, attr] >= split]
+    return np.array(left_set), np.array(right_set)
+
 
 def decision_tree_learning(dataset, depth):
     all_labels = dataset[:, -1]  # Get the column with all the labels
@@ -120,8 +123,8 @@ def decision_tree_learning(dataset, depth):
         attr, split = find_optimal_split_point(dataset)
         split_node = Node(attr, split, None, None)
         ldata, rdata = split_dataset(dataset, attr, split)
-        split_node.left, ldepth = decision_tree_learning(ldata, depth+1)
-        split_node.right, rdepth = decision_tree_learning(rdata, depth+1)
+        split_node.left, ldepth = decision_tree_learning(ldata, depth + 1)
+        split_node.right, rdepth = decision_tree_learning(rdata, depth + 1)
         return split_node, max(ldepth, rdepth)
 
 
@@ -129,6 +132,7 @@ def fit(dataset, depth):
     decision_tree = decision_tree_learning(dataset, depth)
     # TODO: Visualize tree
     return decision_tree
+
 
 def predict(tree, dataset):
     # TODO:
@@ -145,10 +149,10 @@ def predict(tree, dataset):
                 node = node.right
         labels[i] = node.val
     return labels
-            
+
 
 def cross_validation(dataset):
-    #TODO:
+    # TODO:
     # Suffle dataset to maintain randomness
     nb_folds = 10
     np.random.shuffle(dataset)
@@ -159,12 +163,12 @@ def cross_validation(dataset):
     for i in range(len(folds)):
         # Take 1 fold out as testing set
         testing_set = folds[i]
-        remaining_folds = folds[:i] + folds[i+1:]
+        remaining_folds = folds[:i] + folds[i + 1:]
         training_set = remaining_folds[0]
         # Build decision tree based on training set (remaining 9 folds)
         tree, depth = decision_tree_learning(training_set, 0)
         # Store evaluation metrics for each iteration
-        actual_class_labels = testing_set[:,-1]
+        actual_class_labels = testing_set[:, -1]
         predicted_class_labels = predict(tree, testing_set)
         matrix = confusion_matrix(predicted_class_labels, actual_class_labels)
         totalAccuracy += accuracy(matrix, len(predicted_class_labels))
@@ -179,6 +183,7 @@ def cross_validation(dataset):
     print("F1-measure:", totalF1 / nb_folds * 100, "%")
     return
 
+
 def confusion_matrix(predicted, actual):
     matrix = np.zeros((label_count, label_count))
     for i in range(len(actual)):
@@ -187,11 +192,13 @@ def confusion_matrix(predicted, actual):
         matrix[al][pl] += 1
     return matrix
 
+
 def accuracy(matrix, total):
     diagonal = 0
     for i in range(label_count):
         diagonal += matrix[i][i]
     return diagonal / total
+
 
 def prf_metrics(matrix):
     totalRecall, totalPrecision, totalF1 = 0, 0, 0
@@ -204,12 +211,13 @@ def prf_metrics(matrix):
         precision = tp / totalCol
         totalPrecision += precision
         totalF1 += 2 * precision * recall / (precision + recall)
-    return totalPrecision / label_count, totalRecall / label_count, totalF1/label_count
-    
+    return totalPrecision / label_count, totalRecall / label_count, totalF1 / label_count
+
+
 # print(find_optimal_split_point(cleanData))
-#tree, depth = decision_tree_learning(cleanData, 0)
-#print(tree.show(), "depth", depth)
-print("Clean Data:") 
+# tree, depth = decision_tree_learning(cleanData, 0)
+# print(tree.show(), "depth", depth)
+print("Clean Data:")
 cross_validation(cleanData)
 print("Noisy Data:")
 cross_validation(noisyData)
