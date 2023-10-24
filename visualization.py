@@ -28,7 +28,7 @@ class Tree_Visualizer:
                              bbox={"boxstyle": "round", "pad": 0.4, "facecolor": "w", "edgecolor": "k"},
                              fontsize="small")
                 else:
-                    plt.text(node.x, node.y, f" Prediction:\n {node.val}", ha='center',
+                    plt.text(node.x, node.y, f" Room:\n {node.val}", ha='center',
                              bbox={"boxstyle": "round", "pad": 0.4, "facecolor": "w", "edgecolor": "k"},
                              fontsize="small")
                 self.plot_tree(node.left, level - 1, position - 2 ** level / 10, (node.x, node.y))
