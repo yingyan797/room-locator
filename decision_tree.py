@@ -10,11 +10,13 @@ attr_count = data_shape[1] - 1
 
 # define the data structure of the decision tree
 class Node:
-    def __init__(self, attr, val, left, right):
+    def __init__(self, attr, val, left=None, right=None):
         self.attr = attr
         self.val = val
         self.left = left
         self.right = right
+        self.x = 0
+        self.y = 0
 
     def show(self):
         if self.left is None and self.right is None:
@@ -60,11 +62,11 @@ def find_optimal_split_point(dataset):
             label_frequency[label - 1] += 1  # calculate the frequency of this label
             if v == value:
                 info = value_group[-1][1]
-                info.frequency[label-1] += 1
+                info.frequency[label - 1] += 1
                 info.count += 1
             else:
                 info = ValueInfo(label_count)
-                info.frequency[label-1] = 1
+                info.frequency[label - 1] = 1
                 info.count = 1
                 if len(value_group) >= 2:
                     info2 = value_group[-2][1]
@@ -83,7 +85,7 @@ def find_optimal_split_point(dataset):
         right_finder = OptimumFinder(len(sorted_dataset), label_frequency)
         if min_remainder is None:
             min_remainder = right_finder.entropy()
-        
+
         i = 0
         while len(split_points) > 0:
             (value, info) = value_group[i]
@@ -93,7 +95,8 @@ def find_optimal_split_point(dataset):
                 i += 1
             else:
                 split = split_points.pop(0)
-                rem = (left_finder.entropy()*left_finder.size + right_finder.entropy()*right_finder.size) / len(sorted_dataset)
+                rem = (left_finder.entropy() * left_finder.size + right_finder.entropy() * right_finder.size) / len(
+                    sorted_dataset)
                 # print(column, split, rem)
                 if rem < min_remainder:
                     min_remainder = rem
@@ -101,10 +104,12 @@ def find_optimal_split_point(dataset):
                     max_IG_split = split
     return max_IG_attr, max_IG_split
 
-def split_dataset(dataset, attr, split):#Get the left and right datasets from a splitting point
-        left_set=dataset[dataset[:,attr] < split]
-        right_set=dataset[dataset[:,attr] >= split]
-        return np.array(left_set), np.array(right_set)
+
+def split_dataset(dataset, attr, split):  # Get the left and right datasets from a splitting point
+    left_set = dataset[dataset[:, attr] < split]
+    right_set = dataset[dataset[:, attr] >= split]
+    return np.array(left_set), np.array(right_set)
+
 
 def decision_tree_learning(dataset, depth):
     print(depth)
@@ -115,8 +120,8 @@ def decision_tree_learning(dataset, depth):
         attr, split = find_optimal_split_point(dataset)
         split_node = Node(attr, split, None, None)
         ldata, rdata = split_dataset(dataset, attr, split)
-        split_node.left, ldepth = decision_tree_learning(ldata, depth+1)
-        split_node.right, rdepth = decision_tree_learning(rdata, depth+1)
+        split_node.left, ldepth = decision_tree_learning(ldata, depth + 1)
+        split_node.right, rdepth = decision_tree_learning(rdata, depth + 1)
         return split_node, max(ldepth, rdepth)
 
 
@@ -125,14 +130,19 @@ def fit(dataset, depth):
     # TODO: Visualize tree
     return decision_tree
 
+
 def predict():
     # TODO:
     return
 
+
 def cross_validation():
-    #TODO:
+    # TODO:
     return
+
 
 # print(find_optimal_split_point(cleanData))
 tree, depth = decision_tree_learning(cleanData, 0)
+
+
 print(tree.show(), "depth", depth)
