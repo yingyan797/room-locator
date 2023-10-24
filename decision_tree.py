@@ -161,7 +161,10 @@ def cross_validation(dataset):
         # Take 1 fold out as testing set
         testing_set = folds[i]
         remaining_folds = folds[:i] + folds[i + 1:]
-        training_set = remaining_folds[0]
+        training_set = remaining_folds.pop(0)
+        while len(remaining_folds) > 0:
+            training_set = np.concatenate((training_set, remaining_folds.pop(0)))
+        
         # Build decision tree based on training set (remaining 9 folds)
         tree, depth = decision_tree_learning(training_set, 0, 10)
         # Store evaluation metrics for each iteration
@@ -213,3 +216,5 @@ def prf_metrics(matrix):
         totalPrecision += precision
         totalF1 += 2 * precision * recall / (precision + recall)
     return totalPrecision / label_count, totalRecall / label_count, totalF1 / label_count
+
+cross_validation(noisyData)
