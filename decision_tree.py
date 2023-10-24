@@ -3,7 +3,7 @@ from model import ValueInfo, OptimumFinder
 
 # read dataset to np_array
 cleanData = np.loadtxt("wifi_db/clean_dataset.txt")
-noisyDate = np.loadtxt("wifi_db/noisy_dataset.txt")
+noisyData = np.loadtxt("wifi_db/noisy_dataset.txt")
 data_shape = cleanData.shape
 attr_count = data_shape[1] - 1
 
@@ -22,6 +22,12 @@ class Node:
         return "If attribute " + str(self.attr) + " <= " + str(
             self.val) + " {\n  " + self.left.show() + "\n}\n" + "otherwise (attribute " + str(self.attr) + ") > " + str(
             self.val) + " {\n  " + self.right.show()
+            
+    def isLeaf(self):
+        if self.right == None and self.left == None:
+            return True
+        else:
+            return False
 
 
 # count the total number of classes(labels) in the dataset
@@ -107,7 +113,6 @@ def split_dataset(dataset, attr, split):#Get the left and right datasets from a 
         return np.array(left_set), np.array(right_set)
 
 def decision_tree_learning(dataset, depth):
-    print(depth)
     all_labels = dataset[:, -1]  # Get the column with all the labels
     if np.all(all_labels == all_labels[0]) or depth >= 100:  # Checks if all of the labels are the same
         return Node(None, all_labels[0], None, None), depth
@@ -125,14 +130,65 @@ def fit(dataset, depth):
     # TODO: Visualize tree
     return decision_tree
 
-def predict():
+def predict(tree, dataset):
     # TODO:
-    return
+    # Return array of class labels predicted using the input decision tree
+    # Maintains same order
+    labels = np.zeros(len(dataset))
+    for i in range(len(dataset)):
+        node = tree
+        row = dataset[i]
+        while not node.isLeaf():
+            if row[node.attr] < node.val:
+                node = node.left
+            else:
+                node = node.right
+        labels[i] = node.val
+    return labels
+            
 
-def cross_validation():
+def cross_validation(dataset):
     #TODO:
-    return
+    # Suffle dataset to maintain randomness
+    np.random.shuffle(dataset)
+    # Split dataset into 10 folds
+    folds = np.array_split(dataset, 10)
+    total = 0
+    # Iterate 10 times, and each time do:
+    for i in range(len(folds)):
+        # Take 1 fold out as testing set
+        testing_set = folds[i]
+        remaining_folds = folds[:i] + folds[i+1:]
+        training_set = remaining_folds[0]
+        # Build decision tree based on training set (remaining 9 folds)
+        tree, depth = decision_tree_learning(training_set, 0)
+        # Store evaluation metrics for each iteration
+        actual_class_labels = testing_set[:,-1]
+        predicted_class_labels = predict(tree, testing_set)
+        matrix = confusion_matrix(predicted_class_labels, actual_class_labels)
+        acc = accuracy(matrix, len(predicted_class_labels))
+        total += acc
+    # Return averaged evalution metrics
+    return total / 10
 
+def confusion_matrix(predicted, actual):
+    matrix = np.zeros((label_count, label_count))
+    for i in range(len(actual)):
+        pl = int(predicted[i] - 1)
+        al = int(actual[i] - 1)
+        matrix[al][pl] += 1
+    return matrix
+
+def accuracy(matrix, total):
+    diagonal = 0
+    for i in range(label_count):
+        diagonal += matrix[i][i]
+    return diagonal / total
+
+def recall(matrix, total):
+    return
+    
 # print(find_optimal_split_point(cleanData))
-tree, depth = decision_tree_learning(cleanData, 0)
-print(tree.show(), "depth", depth)
+#tree, depth = decision_tree_learning(cleanData, 0)
+#print(tree.show(), "depth", depth)
+print(cross_validation(noisyData))
