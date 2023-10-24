@@ -150,10 +150,11 @@ def predict(tree, dataset):
 def cross_validation(dataset):
     #TODO:
     # Suffle dataset to maintain randomness
+    nb_folds = 10
     np.random.shuffle(dataset)
     # Split dataset into 10 folds
     folds = np.array_split(dataset, 10)
-    total = 0
+    totalAccuracy, totalRecall, totalPrecision, totalF1 = 0, 0, 0, 0
     # Iterate 10 times, and each time do:
     for i in range(len(folds)):
         # Take 1 fold out as testing set
@@ -166,10 +167,17 @@ def cross_validation(dataset):
         actual_class_labels = testing_set[:,-1]
         predicted_class_labels = predict(tree, testing_set)
         matrix = confusion_matrix(predicted_class_labels, actual_class_labels)
-        acc = accuracy(matrix, len(predicted_class_labels))
-        total += acc
+        totalAccuracy += accuracy(matrix, len(predicted_class_labels))
+        precision, recall, f1 = prf_metrics(matrix)
+        totalPrecision += precision
+        totalRecall += recall
+        totalF1 += f1
     # Return averaged evalution metrics
-    return total / 10
+    print("Accuracy:", totalAccuracy / nb_folds * 100, "%")
+    print("Recall:", totalRecall / nb_folds * 100, "%")
+    print("Precision:", totalPrecision / nb_folds * 100, "%")
+    print("F1-measure:", totalF1 / nb_folds * 100, "%")
+    return
 
 def confusion_matrix(predicted, actual):
     matrix = np.zeros((label_count, label_count))
@@ -185,10 +193,23 @@ def accuracy(matrix, total):
         diagonal += matrix[i][i]
     return diagonal / total
 
-def recall(matrix, total):
-    return
+def prf_metrics(matrix):
+    totalRecall, totalPrecision, totalF1 = 0, 0, 0
+    for i in range(label_count):
+        tp = matrix[i][i]
+        totalRow = np.sum(matrix[i])
+        totalCol = np.sum(matrix[:, i])
+        recall = tp / totalRow
+        totalRecall += recall
+        precision = tp / totalCol
+        totalPrecision += precision
+        totalF1 += 2 * precision * recall / (precision + recall)
+    return totalPrecision / label_count, totalRecall / label_count, totalF1/label_count
     
 # print(find_optimal_split_point(cleanData))
 #tree, depth = decision_tree_learning(cleanData, 0)
 #print(tree.show(), "depth", depth)
-print(cross_validation(noisyData))
+print("Clean Data:") 
+cross_validation(cleanData)
+print("Noisy Data:")
+cross_validation(noisyData)
