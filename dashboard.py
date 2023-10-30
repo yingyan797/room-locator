@@ -11,7 +11,7 @@ decision = dt.Decision()
 @app.route('/', methods=['GET', 'POST']) 
 def index():
     print(request.form)
-    room_num = None
+    room_nums = []
     report = []
     conf = []
     graphs = []
@@ -21,13 +21,13 @@ def index():
         decision.__init__()
         file = ""
     else:
-        match file:
-            case "clean":
-                decision.load_data(dt.cleanData)
-            case "noisy":
-                decision.load_data(dt.noisyData)
-            case "customized":
-                pass
+        if file == "Clean Dataset":
+            decision.load_data(dt.cleanData)
+        elif file == "Noisy Dataset":
+            decision.load_data(dt.noisyData)
+        elif file != None:
+            decision.load_data("wifi_db/"+file)
+   
         if decision.all_data is not None:
             if request.form.get("cross"):
                 mt, report, confmat = decision.cross_validation()
@@ -38,7 +38,7 @@ def index():
                     for v in confmat[i]:
                         tr.append(str(int(v)))
                     conf.append(tr)
-            else:
+            elif request.form.get("decision"):
                 decision.fit()
 
     if decision.decision_tree:
@@ -47,19 +47,25 @@ def index():
             session = get_session()
             graphs = tv.visualize(session)
         if request.form.get("predict"):
-            data = []
-            for attr in attrs:
-                signal = request.form.get(attr)
-                if signal is None or signal == "":
-                    break
-                else:
-                    data.append(float(signal))
-            if len(data) == 7:
-                data_predict = np.array([data])
-                room_num = int(dt.predict(decision.decision_tree, data_predict)[0])
+            data_predict = None
+            predf = request.form.get("pred_file")
+            if predf:
+                data_predict = np.loadtxt("predictions/"+predf)
+            else:
+                data = []
+                for attr in attrs:
+                    signal = request.form.get(attr)
+                    if signal is None or signal == "":
+                        break
+                    else:
+                        data.append(float(signal))
+                if len(data) == 7:
+                    data_predict = np.array([data])
+            if data_predict is not None:
+                room_nums = dt.predict(decision.decision_tree, data_predict)
 
     return render_template('index.html', data_name=file, graphs=graphs, decision=decision, 
-                           attrs=attrs, room_num=room_num, report=report, conf=conf)
+                           attrs=attrs, room_nums=room_nums, report=report, conf=conf)
 
 @app.route('/graphs', methods=['GET', 'POST']) 
 def graphs():

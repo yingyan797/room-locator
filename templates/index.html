@@ -33,10 +33,10 @@
         <h1 style="background-color: skyblue;">Receptor positioning by WiFi signal strength</h1>
         <h2>Select sample dataset to train the model</h2>
         <form name="data" action="/" method="post">
-            Clean dataset<input type="radio" name="dataset" value="clean">
-            ; Noisy dataset<input type="radio" name="dataset" value="noisy"><br>
-            Or upload your own dataset: <input type="file" name="dataset" value=customized><br><br>
-            <button type="submit">Create decision tree</button>
+            Clean dataset<input type="radio" name="dataset" value="Clean Dataset">
+            ; Noisy dataset<input type="radio" name="dataset" value="Noisy Dataset"><br>
+            Or upload new dataset (.txt, from "wifi_db" directory): <input type="file" name="dataset" accept=".txt" dirname="static"><br><br>
+            <input type="submit" name="decision" value="Create decision tree">
             <input type="submit" name="reselect" value="Reselect dataset"><br>
             See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
             <b>Confusion Matrix: </b><br>
@@ -63,21 +63,27 @@
             {% endfor %}
         </textarea>
         </form>
-        {% if data_name and decision.decision_tree %}
-        **Successful! Decision tree has been constructed for Dataset: <b>{{data_name}}</b> <br>
+        {% if data_name %}
+        Dataset for training: <b>{{data_name}}</b><br>
+        {% if decision.decision_tree %}
+        **Decision tree has been constructed successfully!<br>
+        {% endif %}
         {% endif %}
         <h2>Locate your receptor</h2>
         <form action="/" method="post">
-            <b>Fill in signal strength measures: </b><br>
+            <b>Upload a file of signal values to predict </b>(.txt, from "predictions" directory): <input type="file" name="pred_file"><br>
+            <br><b>Alternatively, fill in signal strengths: </b><br>
             {% for attr in attrs[:4] %}
-            WiFi {{attr[-1]}} <input type="number" name="{{attr}}" min="-100", max="100" value="-45">
+            WiFi {{attr[-1]}} <input type="number" name="{{attr}}" min="-100", max="100">
             {% endfor %}<br>
             {% for attr in attrs[4:] %}
-            WiFi {{attr[-1]}} <input type="number" name="{{attr}}" min="-100", max="100" value="-50">
+            WiFi {{attr[-1]}} <input type="number" name="{{attr}}" min="-100", max="100">
             {% endfor %}
-            <br><input type="submit" name="predict" value="Locate"><br>
+            <br><br><b>Room numbers: </b><input type="submit" name="predict" value="Make predictions"><br>
         </form>
-        <b>Room number: </b><textarea cols="5" rows="1">{{room_num}}</textarea>
+        {% for rn in room_nums %}
+        <textarea cols="2" rows="1">{{rn}}</textarea>
+        {% endfor %}
 
     </div>
     <div class="column">
