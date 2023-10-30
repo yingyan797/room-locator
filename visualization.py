@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from decision_tree import decision_tree_learning
+# from decision_tree import decision_tree_learning
 
 
 class Tree_Visualizer:
@@ -33,23 +33,33 @@ class Tree_Visualizer:
                 self.plot_tree(node.left, level - 1, position - 2 ** level / 10, (node.x, node.y))
                 self.plot_tree(node.right, level - 1, position + 2 ** level / 10, (node.x, node.y))
 
-    def visualize(self):
+    def visualize(self, session_num):
         # Configure plot
+        graphs = []
+        f = open("graphdb.csv", "a")
         fig, ax = plt.subplots(figsize=(30, 30))
         plt.axis('off')
         ax.set_aspect('equal')
         self.plot_tree(self.tree, level=5, position=0)
-        plt.savefig("./plots/mainT.png")
+        gname = "mainT_"+str(session_num)+".png"
+        plt.savefig("static/plots/"+gname)
+        f.write(str(session_num)+','+gname+'\n')
+        graphs.append(gname)
+
         for index, t in enumerate(self.subtree_list):
             fig, ax = plt.subplots(figsize=(30, 30))
             plt.axis('off')
             ax.set_aspect('equal')
             self.plot_tree(t, level=5, position=0)
-            plt.savefig(f"./plots/subT{index+1}.png")
+            gname = "subT"+str(index+1)+'_'+str(session_num)+".png"
+            plt.savefig("static/plots/"+gname)
+            f.write(str(session_num)+','+gname+'\n')
+            graphs.append(gname)
+        f.close()
+        return graphs
 
-
-if __name__ == '__main__':
-    cleanData = np.loadtxt("wifi_db/clean_dataset.txt")
-    tree, depth = decision_tree_learning(cleanData, 0, 10)
-    visualizer = Tree_Visualizer(tree)
-    visualizer.visualize()
+# if __name__ == '__main__':
+#     cleanData = np.loadtxt("wifi_db/clean_dataset.txt")
+#     tree, depth = decision_tree_learning(cleanData, 0, 10)
+#     visualizer = Tree_Visualizer(tree)
+#     visualizer.visualize()

@@ -1,29 +1,74 @@
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Room locator</title>
+    <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    /* Create two equal columns that floats next to each other */
+    .column {
+      float: left;
+      width: 50%;
+      padding: 25px;
+      /* height: 300px; Should be removed. Only for demonstration */
+    }
+    
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    </style>
 </head>
+
 <body>
-    <h1 style="background-color: skyblue;">Receptor location finder by WiFi signal strength</h1>
-    <h2>Decision tree performance</h2>
-    <form action="/" method="post">
-        <b>Select dataset to see performance:</b> <br>
-        Clean dataset<input type="radio" name="dataset" value="clean">
-        ; Noisy dataset<input type="radio" name="dataset" value="noisy">
-        <input type="submit" name="report" value="Generate report">
-    </form>
-    <textarea name="analytics" cols="85" rows="10"></textarea>
-    <h2>Locate your receptor</h2>
-    <form action="/" method="post">
-        <b>Upload training dadaset </b><br>
-        <input type="file" name="train" value=><br><br>
-        <b>Fill in signal strength measures: </b><br>
-        WiFi 1<input type="number" name="x0" min="-100", max="100">
-        WiFi 2<input type="number" name="x1" min="-100", max="100">
-        WiFi 3<input type="number" name="x2" min="-100", max="100">
-        WiFi 4<input type="number" name="x3" min="-100", max="100"><br>
-        WiFi 5<input type="number" name="x4" min="-100", max="100">
-        WiFi 6<input type="number" name="x5" min="-100", max="100">
-        WiFi 7<input type="number" name="x6" min="-100", max="100">
-    </form>
-    <input type="submit" name="predict" value="Locate"><br>
-    <b>Room number: </b><textarea cols="10" rows="1"></textarea>
+    <div class="row">
+   <div class="column">
+        <h1 style="background-color: skyblue;">Receptor positioning by WiFi signal strength</h1>
+        <h2>Select sample dataset to train the model</h2>
+        <form name="data" action="/" method="post">
+            Clean dataset<input type="radio" name="dataset" value="clean">
+            ; Noisy dataset<input type="radio" name="dataset" value="noisy"><br>
+            Or upload your own dataset: <input type="file" name="dataset" value=customized><br><br>
+            <button type="submit">Create decision tree</button>
+            <input type="submit" name="reselect" value="Reselect dataset"><br>
+            See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
+            {% for stat in report %}
+            <textarea cols="50" rows="1">{{stat}}</textarea>
+            {% endfor %}
+        </textarea>
+        </form>
+        {% if data_name and decision.decision_tree %}
+        **Successful! Decision tree has been constructed for Dataset: <b>{{data_name}}</b> <br>
+        {% endif %}
+        <h2>Locate your receptor</h2>
+        <form action="/" method="post">
+            <b>Fill in signal strength measures: </b><br>
+            {% for attr in attrs[:4] %}
+            WiFi {{attr[-1]}} <input type="number" name="{{attr}}" min="-100", max="100" value="-45">
+            {% endfor %}<br>
+            {% for attr in attrs[4:] %}
+            WiFi {{attr[-1]}} <input type="number" name="{{attr}}" min="-100", max="100" value="-50">
+            {% endfor %}
+            <br><input type="submit" name="predict" value="Locate"><br>
+        </form>
+        <b>Room number: </b><textarea cols="5" rows="1">{{room_num}}</textarea>
+
+    </div>
+    <div class="column">
+        <h1>Visualize decision tree</h1>
+        <form action="\" method="post">
+            <input type="submit" name="visualization" value="Visualize decision tree">
+            <input type="submit" name="clear" value="Clear graphic history"><br>
+         </form>
+        {% if graphs %}
+            {% for gname in graphs %}
+            {{gname}} <br>
+            <img src="static/plots/{{gname}}" alt="Tree visualization" width="500" height="600"><br>
+            {% endfor %}
+        {% endif %}
+    </div>
+    </div> 
 </body>
