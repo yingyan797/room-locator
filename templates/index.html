@@ -22,7 +22,11 @@
     }
     </style>
 </head>
-
+<style>
+    table, th, td {
+      border:1px solid black;
+    }
+</style>
 <body>
     <div class="row">
    <div class="column">
@@ -35,6 +39,25 @@
             <button type="submit">Create decision tree</button>
             <input type="submit" name="reselect" value="Reselect dataset"><br>
             See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
+            <b>Confusion Matrix: </b><br>
+            {% if conf %}
+            <table>
+                <tr>
+                    {% for h in conf[0] %}
+                    <th><b>{{h}}</b></th>
+                    {% endfor %}
+                </tr>
+                {% for r in conf[1:] %}
+                <tr>
+                    <th><b>{{r[0]}}</b></th>
+                    {% for v in r[1:] %}
+                    <td>{{v}}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}   
+            </table>
+            {% endif %}
+            <b>Evaluation statistics</b><br>
             {% for stat in report %}
             <textarea cols="50" rows="1">{{stat}}</textarea>
             {% endfor %}

@@ -180,7 +180,7 @@ class Decision:
         return max, ["Accuracy: "+str(totalAccuracy / nb_folds * 100)+"%",
                      "Recall: "+ str(totalRecall / nb_folds * 100) +"%",
                      "Precision: "+str(totalPrecision / nb_folds * 100)+ "%",
-                     "F1-measure: "+str(totalF1 / nb_folds * 100) +"%"]
+                     "F1-measure: "+str(totalF1 / nb_folds * 100) +"%"], matrix
 
 
     def confusion_matrix(self, predicted, actual):

@@ -13,6 +13,7 @@ def index():
     print(request.form)
     room_num = None
     report = []
+    conf = []
     graphs = []
     attrs = ["x"+str(i) for i in range(7)]    
     file = request.form.get("dataset")
@@ -29,7 +30,14 @@ def index():
                 pass
         if decision.all_data is not None:
             if request.form.get("cross"):
-                report = decision.cross_validation()[1]
+                mt, report, confmat = decision.cross_validation()
+                th = ["Pr/Ac"]+[str(i+1) for i in range(decision.label_count)]
+                conf.append(th)
+                for i in range(decision.label_count):
+                    tr = [str(i+1)]
+                    for v in confmat[i]:
+                        tr.append(str(int(v)))
+                    conf.append(tr)
             else:
                 decision.fit()
 
@@ -51,7 +59,7 @@ def index():
                 room_num = int(dt.predict(decision.decision_tree, data_predict)[0])
 
     return render_template('index.html', data_name=file, graphs=graphs, decision=decision, 
-                           attrs=attrs, room_num=room_num, report=report)
+                           attrs=attrs, room_num=room_num, report=report, conf=conf)
 
 @app.route('/graphs', methods=['GET', 'POST']) 
 def graphs():
