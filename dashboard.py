@@ -8,18 +8,13 @@ import glob
 app = Flask(__name__)
 decision = dt.Decision()
 
-@app.route('/', methods=['GET', 'POST']) # show the main page
+@app.route('/', methods=['GET', 'POST']) 
 def index():
     print(request.form)
     room_num = None
     report = []
     graphs = []
-    attrs = ["x"+str(i) for i in range(7)]
-    if request.form.get("clear"):
-        files = glob.glob('static/plots/*')
-        for f in files:
-            os.remove(f)
-        open("graphdb.csv", "w").write("")
+    attrs = ["x"+str(i) for i in range(7)]    
     file = request.form.get("dataset")
     if request.form.get("reselect"):
         decision.__init__()
@@ -58,6 +53,33 @@ def index():
     return render_template('index.html', data_name=file, graphs=graphs, decision=decision, 
                            attrs=attrs, room_num=room_num, report=report)
 
+@app.route('/graphs', methods=['GET', 'POST']) 
+def graphs():
+    print(request.form)
+    history1 = []
+    history2 = []
+    if request.form.get("clear"):
+        files = glob.glob('static/plots/*')
+        for f in files:
+            os.remove(f)
+        open("graphdb.csv", "w").write("")
+    else:
+        f = open("graphdb.csv", "r")
+        left = True
+        while True:
+            line = f.readline()
+            if line != "":
+                gname = line[2:-1]
+                if left:
+                    history1.append(gname)
+                    left = False
+                else:
+                    history2.append(gname)
+                    left = True
+            else:
+                break
+    return render_template('graphs.html', history1=history1, history2=history2)
+
 def get_session():
     f = open("graphdb.csv", "r")
     lines = f.readlines()
@@ -66,7 +88,7 @@ def get_session():
         return 0
     
     num = lines[-1][0]
-    if int(num) >= 3:
+    if int(num) >= 8:
         f = open("graphdb.csv", "w")
         while lines[0][0] == '0':
             lines.pop(0)

@@ -1,0 +1,44 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Graph history</title>
+    <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    /* Create two equal columns that floats next to each other */
+    .column {
+      float: left;
+      width: 50%;
+      padding: 25px;
+      /* height: 300px; Should be removed. Only for demonstration */
+    }
+    
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    </style>
+</head>
+
+<body>
+    <h1>Decision tree visualization history</h1>
+    <form action="/graphs" method="post">
+        <input type="submit" name="clear" value="Clear graphic history"><br>
+    </form>
+    <div class="row">
+        <div class="column">
+            {% for h1 in history1 %}
+            Decision Tree {{h1[-5]}} -- {{h1}} <br>
+            <img src="static/plots/{{h1}}" alt="Tree visualization" width="500" height="600"><br>
+            {% endfor %}
+        </div>
+        <div class="column">
+            {% for h2 in history2 %}
+            Decision Tree {{h2[-5]}} -- {{h2}} <br>
+            <img src="static/plots/{{h2}}" alt="Tree visualization" width="500" height="600"><br>
+            {% endfor %}
+        </div>
+    </div>

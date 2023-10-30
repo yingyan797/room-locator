@@ -59,13 +59,13 @@
     </div>
     <div class="column">
         <h1>Visualize decision tree</h1>
-        <form action="\" method="post">
-            <input type="submit" name="visualization" value="Visualize decision tree">
-            <input type="submit" name="clear" value="Clear graphic history"><br>
+        <form action="/" method="post" target="_blank">
+            <input type="submit" name="visualization" value="Draw decision tree">
+            <a href="/graphs" target="_blank">View graphic history</a>
          </form>
         {% if graphs %}
             {% for gname in graphs %}
-            {{gname}} <br>
+            Decision Tree {{gname[-5]}} -- {{gname}} <br>
             <img src="static/plots/{{gname}}" alt="Tree visualization" width="500" height="600"><br>
             {% endfor %}
         {% endif %}
