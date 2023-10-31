@@ -11,26 +11,26 @@ Before running the code make sure to have flask,numpy and matplotlib. In order f
 
 # General usage
 
-To run the code and see results, run dashboard.py and follow the local host  outputed in your terminal
+To run the code and see results, run dashboard.py and follow the local host  outputed in your terminal.
 After copying the url in your web browser you can start running our program.
 
 Our program has two main functionalities, all accessible from the webpage:
 - Train a model based on the clean/noisy datasets or your own uploaded dataset, and:
-    - evaluate the performance of the model by performing a cross validation
-    - create the decision tree and visualise it using matplotlib
+    - Evaluate the performance of the model by performing a cross validation
+    - Create the decision tree and visualise it using matplotlib
 - Make predictions based on inputed samples (manually or uploaded)
 
 # Training
-- Before doing anything else you need to train your model based on the dataset provided. For that make sure to push the "Create decision tree button" before anything else(!WARNING: If you don't do this it will not work correctly)
-- If you want to select a different dataset make sure to press the "Reselect dataset" button
+- Before doing anything else, you need to train your model based on the provided dataset. For that, make sure to press the "Create decision tree" button before anything else (WARNING: If you don't do this it will not work correctly)
+- If you want to select a different dataset, make sure to press the "Reselect dataset" button
 
 # Visualization
 - Simply push the "draw decision tree" button and a number of graphs will be created representing your decision tree
-    - Due to problems with visualization,the tree is drawn across multiple plots and divided into subtress in order for every node to be properly visualized
+    - The tree will be drawn across multiple plots and divided into subtress in order for every node to be properly visualized.
     - If you're not able to properly see the information of each split point make sure to zoom in or download the image if you still have problems.
 
 # Validation
-- Just press the Cross validation button  and it will show you both the confusion matrix and the relevant evaluation statistics:
+- Just press the Cross validation button and it will show you both the confusion matrix and the relevant evaluation statistics:
        - the accuracy
        - the recall
        - the precision
@@ -41,6 +41,6 @@ Our program has two main functionalities, all accessible from the webpage:
     - If you upload a file make sure that it clears the following condition:
         - It's a .txt file
         - It's located inside the provided "predictions directory"
-        -Has the same formatting as the provided clean and noisy dataset.
-    - If you manually input values put them in their corresponding boxes.
--Finally, push the "make predictions" button to show the predictions
+        - It has the same formatting as the provided clean and noisy datasets
+    - If you manually input values, put them in their corresponding boxes
+- Finally, push the "make predictions" button to display the predictions
