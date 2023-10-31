@@ -19,17 +19,17 @@ class Tree_Visualizer:
                          color=color[level % len(color)])
             if level < 1 and (node.attr is not None):
                 self.subtree_list.append(node)
-                plt.text(node.x, node.y, f"subT{len(self.subtree_list)}", ha='center',
-                         bbox={"boxstyle": "round", "pad": 0.4, "facecolor": "w", "edgecolor": "k"}, fontsize="small")
+                plt.text(node.x, node.y, f"subT{len(self.subtree_list)}",
+                         bbox={"boxstyle": "round", "pad": 0.4, "facecolor": "w", "edgecolor": "k"}, fontsize="large")
             else:
                 if node.attr is not None:
-                    plt.text(node.x, node.y, f"attr: {node.attr}\n <{node.val}", ha='center',
+                    plt.text(node.x, node.y, f"WiFi {node.attr}\n <{node.val}",
                              bbox={"boxstyle": "round", "pad": 0.4, "facecolor": "w", "edgecolor": "k"},
-                             fontsize="small")
+                             fontsize="large")
                 else:
-                    plt.text(node.x, node.y, f" Room:\n {node.val}", ha='center',
+                    plt.text(node.x, node.y, f" Room:\n {node.val}",
                              bbox={"boxstyle": "round", "pad": 0.4, "facecolor": "w", "edgecolor": "k"},
-                             fontsize="small")
+                             fontsize="large")
                 self.plot_tree(node.left, level - 1, position - 2 ** level / 10, (node.x, node.y))
                 self.plot_tree(node.right, level - 1, position + 2 ** level / 10, (node.x, node.y))
 
