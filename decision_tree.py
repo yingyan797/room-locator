@@ -7,30 +7,31 @@ noisyData = "wifi_db/noisy_dataset.txt"
 # define the data structure of the decision tree
 class Node:
     def __init__(self, attr, val, left, right):
-        self.attr = attr
-        self.val = val
-        self.left = left
-        self.right = right
+        self.attr = attr    # attribute (WiFi) number to split on
+        self.val = val      # WiFi signal value to split on
+        self.left = left    # subtree with value < current node
+        self.right = right  # subtree with value >= current node
 
-    def show(self):
+    def show(self):         # Text representation of decision tree
         if self.left is None and self.right is None:
             return "Then the label is " + str(self.val)
         return "If attribute " + str(self.attr) + " <= " + str(
             self.val) + " {\n  " + self.left.show() + "\n}\n" + "otherwise (attribute " + str(self.attr) + ") > " + str(
             self.val) + " {\n  " + self.right.show()
 
-    def isLeaf(self):
+    def isLeaf(self):       # it is leaf node if both left and right subtrees are None
         if self.right == None and self.left == None:
             return True
         else:
             return False
 
-def split_dataset(dataset, attr, split):  # Get the left and right datasets from a splitting point
+# Get the left and right datasets from a splitting point
+def split_dataset(dataset, attr, split):  
     left_set = dataset[dataset[:, attr] < split]
     right_set = dataset[dataset[:, attr] >= split]
     return np.array(left_set), np.array(right_set)
 
-# count the total number of classes(labels) in the dataset
+# Count the total number of classes (labels) in the dataset
 def count_labels(allData):
     labels = []
     for row in allData:
@@ -39,14 +40,14 @@ def count_labels(allData):
             labels.append(l)
     return len(labels)
 
+# Sort the entire dataset on one attribute
 def sortColumn(dataset, attr):
-    # sort the entire dataset on one attribute
     sortedDataset = dataset[dataset[:, attr].argsort()]
     return sortedDataset
 
+# Return an array of class labels predicted for input dataset using the selected decision tree
+# Maintains same order
 def predict(tree, dataset):
-        # Return array of class labels predicted using the input decision tree
-        # Maintains same order
         labels = np.zeros(len(dataset))
         for i in range(len(dataset)):
             node = tree
@@ -59,82 +60,84 @@ def predict(tree, dataset):
             labels[i] = node.val
         return labels
 
+# Main class for processing training dataset, cross validation, and create decision trees
 class Decision:
     def __init__(self):
         self.all_data = None
         self.decision_tree = None
-        self.data_name = None
-    def load_data(self, data_file):
+        self.data_name = None   # File name of input dataset
+
+    def load_data(self, data_file):     # Read .txt data file into array and count the number labels
         self.data_name = data_file
         self.all_data = np.loadtxt(data_file)
         self.label_count = count_labels(self.all_data)
         self.attr_count = len(self.all_data[0]) - 1
 
     def find_optimal_split_point(self, dataset):
-        min_remainder = None  # This is the Information gained
-        max_IG_attr = -1  # This is the attribute where the max IG value belongs
-        max_IG_split = -1  # This is the split value where the max IG value appeared at
+        min_remainder = None  # The splitting option yielding minimum remainder entropy, meaning the maximum information gain
+        max_IG_attr = -1  # This is the attribute for splitting where the maximum information gain belongs
+        max_IG_split = -1  # This is the split value where the maximum information gain appeared
         for column in range(self.attr_count):
             sorted_dataset = sortColumn(dataset, column)  # sort the dataset
             label_frequency = [0 for i in range(self.label_count)]
 
             value = None
-            value_group = []
-            split_points = []
+            value_group = []        # For each distinct value in dataset, record its information in ValueInfo object
+            split_points = []       # Find every value where splitting is considered
             for row in sorted_dataset:
                 label = int(row[-1])
                 v = row[column]
-                label_frequency[label - 1] += 1  # calculate the frequency of this label
-                if v == value:
+                label_frequency[label - 1] += 1  # increment the frequency of this label
+                if v == value:      # The value is repeated
                     info = value_group[-1][1]
                     info.frequency[label - 1] += 1
                     info.count += 1
-                else:
-                    info = ValueInfo(self.label_count)
+                else:               # The value is never encountered
+                    info = ValueInfo(self.label_count)  # create ValueInfo object
                     info.frequency[label - 1] = 1
                     info.count = 1
                     if len(value_group) >= 2:
                         info2 = value_group[-2][1]
                         info1 = value_group[-1][1]
                         if info2.unique_label() < 0 or info2.unique_label() != info1.unique_label():
-                            split_points.append(v)
+                            split_points.append(v)      # Criteria for whether a value should be considered splitting
                     value_group.append((v, info))
                     value = v
-            if len(value_group) >= 2:
+            if len(value_group) >= 2:                   # Append the last value
                 info2 = value_group[-2][1]
                 info1 = value_group[-1][1]
                 if info2.unique_label() < 0 or info2.unique_label() != info1.unique_label():
                     split_points.append(v)
 
+            # Using two OptimumFinder objects for left and right subtrees respectively
             left_finder = OptimumFinder(0, [0 for i in range(self.label_count)])
             right_finder = OptimumFinder(len(sorted_dataset), label_frequency)
             if min_remainder is None:
                 min_remainder = right_finder.entropy()
 
             i = 0
-            while len(split_points) > 0:
+            while len(split_points) > 0:        # Iteratively try each split value considered
                 (value, info) = value_group[i]
                 if value < split_points[0]:
-                    left_finder.update(info, 1)
-                    right_finder.update(info, -1)
+                    left_finder.update(info, 1)     # Left subtree add the current value and its info
+                    right_finder.update(info, -1)   # Right subtree deduct the current value and its info
                     i += 1
-                else:
+                else:                               # Split the dataset on this value
                     split = split_points.pop(0)
                     rem = (left_finder.entropy() * left_finder.size + right_finder.entropy() * right_finder.size) / len(
                         sorted_dataset)
-                    # print(column, split, rem)
-                    if rem < min_remainder:
+                    if rem < min_remainder:         # find minimum remainder
                         min_remainder = rem
                         max_IG_attr = column
                         max_IG_split = split
         return max_IG_attr, max_IG_split
 
     def decision_tree_learning(self, dataset, depth, maxdepth):
-        all_labels = dataset[:, -1]  # Get the column with all the labels
+        all_labels = dataset[:, -1]         # Get the column with all the labels
         if np.all(all_labels == all_labels[0]) or depth > maxdepth:
             # Checks if all the labels are the same or exceed max depth
             return Node(None, all_labels[0], None, None), depth
-        else:
+        else:       # recursively find optimum splitting points for left and right subtrees
             attr, split = self.find_optimal_split_point(dataset)
             split_node = Node(attr, split, None, None)
             ldata, rdata = split_dataset(dataset, attr, split)
@@ -143,7 +146,7 @@ class Decision:
             return split_node, max(ldepth, rdepth)
 
 
-    def fit(self):
+    def fit(self):  # create decision tree on the entire dataset
         self.decision_tree = self.decision_tree_learning(self.all_data, 0, 10)[0]
 
     def cross_validation(self):
@@ -154,6 +157,8 @@ class Decision:
         folds = np.array_split(self.all_data, 10)
         totalAccuracy, totalRecall, totalPrecision, totalF1 = 0, 0, 0, 0
         max = (-1, None)
+        matrix = np.zeros((self.label_count, self.label_count))
+
         # Iterate 10 times, and each time do:
         for i in range(len(folds)):
             # Take 1 fold out as testing set
@@ -168,8 +173,9 @@ class Decision:
             # Store evaluation metrics for each iteration
             actual_class_labels = testing_set[:, -1]
             predicted_class_labels = predict(tree, testing_set)
-            matrix = self.confusion_matrix(predicted_class_labels, actual_class_labels)
-            curr_acc = self.accuracy(matrix, len(predicted_class_labels))
+            fold_matrix = self.confusion_matrix(predicted_class_labels, actual_class_labels)
+            matrix += fold_matrix   # adding the current frequencies to the total confusion matrix
+            curr_acc = self.accuracy(fold_matrix, len(predicted_class_labels))
             totalAccuracy += curr_acc
             #record the most accurate tree and return the result and the tree
             if curr_acc >= max[0]:
@@ -178,7 +184,7 @@ class Decision:
             totalPrecision += precision
             totalRecall += recall
             totalF1 += f1
-        # Return averaged evalution metrics
+        # Return the decision tree with highest accuracy, averaged evaluation metrics, and confusion matrix
         return max, ["Accuracy: "+str(totalAccuracy / nb_folds * 100)+"%",
                      "Recall: "+ str(totalRecall / nb_folds * 100) +"%",
                      "Precision: "+str(totalPrecision / nb_folds * 100)+ "%",
@@ -201,7 +207,7 @@ class Decision:
         return diagonal / total
 
 
-    def prf_metrics(self, matrix):
+    def prf_metrics(self, matrix):      # calculate p(recesion), r(ecall), and f(1measure)
         totalRecall, totalPrecision, totalF1 = 0, 0, 0
         for i in range(self.label_count):
             tp = matrix[i][i]

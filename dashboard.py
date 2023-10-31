@@ -8,7 +8,7 @@ import glob
 app = Flask(__name__)
 decision = dt.Decision()
 
-@app.route('/', methods=['GET', 'POST']) 
+@app.route('/', methods=['GET', 'POST'])    # main page
 def index():
     print(request.form)
     room_nums = []
@@ -68,7 +68,7 @@ def index():
     return render_template('index.html', graphs=graphs, decision=decision, 
                            attrs=attrs, room_nums=room_nums, report=report, conf=conf)
 
-@app.route('/graphs', methods=['GET', 'POST']) 
+@app.route('/graphs', methods=['GET', 'POST'])  # graphic history page
 def graphs():
     print(request.form)
     history1 = []

@@ -1,10 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-# from decision_tree import decision_tree_learning
-
 
 class Tree_Visualizer:
-
     def __init__(self, my_tree):
         self.tree = my_tree
         self.subtree_list = []
@@ -36,7 +33,8 @@ class Tree_Visualizer:
     def visualize(self, session_num, data_name):
         # Configure plot
         graphs = []
-        f = open("graphdb.csv", "a")
+        f = open("graphdb.csv", "a")    
+        # The database for recording the dataset from which each decision tree plot is generated
         fig, ax = plt.subplots(figsize=(30, 30))
         plt.axis('off')
         ax.set_aspect('equal')
