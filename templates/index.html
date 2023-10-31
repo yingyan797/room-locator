@@ -24,7 +24,7 @@
 </head>
 <style>
     table, th, td {
-      border:1px solid black;
+      border:0px solid black;
     }
 </style>
 <body>
@@ -36,8 +36,6 @@
             Clean dataset<input type="radio" name="dataset" value="Clean Dataset">
             ; Noisy dataset<input type="radio" name="dataset" value="Noisy Dataset"><br>
             Or upload new dataset (.txt, from "wifi_db" directory): <input type="file" name="dataset" accept=".txt" dirname="static"><br><br>
-            <input type="submit" name="decision" value="Create decision tree">
-            <input type="submit" name="reselect" value="Reselect dataset"><br>
             See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
             <b>Confusion Matrix: </b><br>
             {% if conf %}
@@ -61,7 +59,8 @@
             {% for stat in report %}
             <textarea cols="50" rows="1">{{stat}}</textarea>
             {% endfor %}
-        </textarea>
+            <br><input type="submit" name="decision" value="Create decision tree">
+            <input type="submit" name="reselect" value="Reselect dataset"><br>
         </form>
         {% if data_name %}
         Dataset for training: <b>{{data_name}}</b><br>

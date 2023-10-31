@@ -31,7 +31,7 @@ def index():
         if decision.all_data is not None:
             if request.form.get("cross"):
                 mt, report, confmat = decision.cross_validation()
-                th = ["Pr/Ac"]+[str(i+1) for i in range(decision.label_count)]
+                th = ["Pred/Actl"]+[str(i+1) for i in range(decision.label_count)]
                 conf.append(th)
                 for i in range(decision.label_count):
                     tr = [str(i+1)]
