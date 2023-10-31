@@ -4,10 +4,10 @@ Room-locator is decision tree based machine learning program that determines the
 
 # installation
 
-Before running the code make sure to have flask,numpy and matplotlib. In order for you to install them run the following commands in your terminal depending on the packages you need
-```pip install flask```
-```pip install numpy```
-```pip install matplotlib```
+Before running the code make sure to have flask,numpy and matplotlib. In order for you to install them run the following commands in your terminal depending on the packages you need:
+- ```pip install flask```
+- ```pip install numpy```
+- ```pip install matplotlib```
 
 # General usage
 
