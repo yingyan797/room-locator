@@ -21,17 +21,18 @@ def index():
         decision.__init__()
         file = ""
     else:
-        if file == "Clean Dataset":
+        print(file)            
+        if file == "clean":
             decision.load_data(dt.cleanData)
-        elif file == "Noisy Dataset":
+        elif file == "noisy":
             decision.load_data(dt.noisyData)
-        elif file != None:
+        elif file:
             decision.load_data("wifi_db/"+file)
    
         if decision.all_data is not None:
             if request.form.get("cross"):
                 mt, report, confmat = decision.cross_validation()
-                th = ["Pred/Actl"]+[str(i+1) for i in range(decision.label_count)]
+                th = ["Actl/Pred"]+[str(i+1) for i in range(decision.label_count)]
                 conf.append(th)
                 for i in range(decision.label_count):
                     tr = [str(i+1)]
@@ -45,7 +46,7 @@ def index():
         if request.form.get("visualization"):
             tv = Tree_Visualizer(decision.decision_tree)
             session = get_session()
-            graphs = tv.visualize(session)
+            graphs = tv.visualize(session, decision.data_name)
         if request.form.get("predict"):
             data_predict = None
             predf = request.form.get("pred_file")
@@ -64,7 +65,7 @@ def index():
             if data_predict is not None:
                 room_nums = dt.predict(decision.decision_tree, data_predict)
 
-    return render_template('index.html', data_name=file, graphs=graphs, decision=decision, 
+    return render_template('index.html', graphs=graphs, decision=decision, 
                            attrs=attrs, room_nums=room_nums, report=report, conf=conf)
 
 @app.route('/graphs', methods=['GET', 'POST']) 
@@ -83,12 +84,13 @@ def graphs():
         while True:
             line = f.readline()
             if line != "":
-                gname = line[2:-1]
+                segs = line.split(',')
+                data_name, gname = segs[1], segs[2][:-1]
                 if left:
-                    history1.append(gname)
+                    history1.append((data_name,gname))
                     left = False
                 else:
-                    history2.append(gname)
+                    history2.append((data_name,gname))
                     left = True
             else:
                 break
@@ -105,8 +107,8 @@ def get_session():
     if int(num) >= 8:
         f = open("graphdb.csv", "w")
         while lines[0][0] == '0':
-            lines.pop(0)
-            os.remove("static/plots/"+lines[0][2:-1])
+            gname = lines.pop(0).split(',')[2][:-1]
+            os.remove("static/plots/"+gname)
         for i in range(len(lines)):
             lines[i] = str(int(lines[i][0])-1)+lines[i][1:-6]+str(int(lines[i][-6])-1)+lines[i][-5:]
         f.writelines(lines)

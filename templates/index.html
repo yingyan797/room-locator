@@ -24,17 +24,18 @@
 </head>
 <style>
     table, th, td {
-      border:0px solid black;
+      border:1px solid black;
     }
 </style>
 <body>
     <div class="row">
-   <div class="column">
-        <h1 style="background-color: skyblue;">Receptor positioning by WiFi signal strength</h1>
+        <h1 style="background-color: violet;">Receptor positioning by WiFi signal strength</h1>
+
+    <div class="column" style="background-color: lightblue;">
         <h2>Select sample dataset to train the model</h2>
         <form name="data" action="/" method="post">
-            Clean dataset<input type="radio" name="dataset" value="Clean Dataset">
-            ; Noisy dataset<input type="radio" name="dataset" value="Noisy Dataset"><br>
+            Clean dataset<input type="radio" name="dataset" value="clean">
+            ; Noisy dataset<input type="radio" name="dataset" value="noisy"><br>
             Or upload new dataset (.txt, from "wifi_db" directory): <input type="file" name="dataset" accept=".txt" dirname="static"><br><br>
             See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
             <b>Confusion Matrix: </b><br>
@@ -62,8 +63,8 @@
             <br><input type="submit" name="decision" value="Create decision tree">
             <input type="submit" name="reselect" value="Reselect dataset"><br>
         </form>
-        {% if data_name %}
-        Dataset for training: <b>{{data_name}}</b><br>
+        {% if decision.data_name %}
+        Dataset for training: <b>{{decision.data_name}}</b><br>
         {% if decision.decision_tree %}
         **Decision tree has been constructed successfully!<br>
         {% endif %}
@@ -85,7 +86,7 @@
         {% endfor %}
 
     </div>
-    <div class="column">
+    <div class="column" style="background-color: lightgoldenrodyellow;">
         <h1>Visualize decision tree</h1>
         <form action="/" method="post">
             <input type="submit" name="visualization" value="Draw decision tree">
@@ -93,7 +94,7 @@
          </form>
         {% if graphs %}
             {% for gname in graphs %}
-            Decision Tree {{gname[-5]}} -- {{gname}} <br>
+            Decision Tree {{gname[-5]}} for <b>{{decision.data_name}}</b> -- {{gname}} <br>
             <img src="static/plots/{{gname}}" alt="Tree visualization" width="500" height="600"><br>
             {% endfor %}
         {% endif %}

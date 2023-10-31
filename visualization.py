@@ -33,7 +33,7 @@ class Tree_Visualizer:
                 self.plot_tree(node.left, level - 1, position - 2 ** level / 10, (node.x, node.y))
                 self.plot_tree(node.right, level - 1, position + 2 ** level / 10, (node.x, node.y))
 
-    def visualize(self, session_num):
+    def visualize(self, session_num, data_name):
         # Configure plot
         graphs = []
         f = open("graphdb.csv", "a")
@@ -43,7 +43,7 @@ class Tree_Visualizer:
         self.plot_tree(self.tree, level=5, position=0)
         gname = "mainT_"+str(session_num)+".png"
         plt.savefig("static/plots/"+gname)
-        f.write(str(session_num)+','+gname+'\n')
+        f.write(str(session_num)+','+data_name+','+gname+'\n')
         graphs.append(gname)
 
         for index, t in enumerate(self.subtree_list):
@@ -53,7 +53,7 @@ class Tree_Visualizer:
             self.plot_tree(t, level=5, position=0)
             gname = "subT"+str(index+1)+'_'+str(session_num)+".png"
             plt.savefig("static/plots/"+gname)
-            f.write(str(session_num)+','+gname+'\n')
+            f.write(str(session_num)+','+data_name+','+gname+'\n')
             graphs.append(gname)
         f.close()
         return graphs

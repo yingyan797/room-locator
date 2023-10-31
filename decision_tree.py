@@ -63,7 +63,9 @@ class Decision:
     def __init__(self):
         self.all_data = None
         self.decision_tree = None
+        self.data_name = None
     def load_data(self, data_file):
+        self.data_name = data_file
         self.all_data = np.loadtxt(data_file)
         self.label_count = count_labels(self.all_data)
         self.attr_count = len(self.all_data[0]) - 1
