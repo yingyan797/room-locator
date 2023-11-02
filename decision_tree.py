@@ -155,7 +155,7 @@ class Decision:
         np.random.shuffle(self.all_data)
         # Split dataset into 10 folds
         folds = np.array_split(self.all_data, 10)
-        totalAccuracy, totalRecall, totalPrecision, totalF1 = 0, 0, 0, 0
+        totalAccuracy = 0
         max = (-1, None)
         matrix = np.zeros((self.label_count, self.label_count))
 
@@ -180,15 +180,19 @@ class Decision:
             #record the most accurate tree and return the result and the tree
             if curr_acc >= max[0]:
                 max = (curr_acc, tree)
-            precision, recall, f1 = self.prf_metrics(matrix)
-            totalPrecision += precision
-            totalRecall += recall
-            totalF1 += f1
+                
+        precisions, recalls, f1s = self.prf_metrics(matrix)
+        prf_table = [[""]+["Room "+str(i+1) for i in range(self.label_count)],
+               ["Recall"]+[str(recall * 100) +"%" for recall in recalls],
+               ["Precision"]+[str(precision * 100) +"%" for precision in precisions],
+               ["F1-measure"]+[str(f1 * 100) +"%" for f1 in f1s]]
         # Return the decision tree with highest accuracy, averaged evaluation metrics, and confusion matrix
-        return max, ["Accuracy: "+str(totalAccuracy / nb_folds * 100)+"%",
-                     "Recall: "+ str(totalRecall / nb_folds * 100) +"%",
-                     "Precision: "+str(totalPrecision / nb_folds * 100)+ "%",
-                     "F1-measure: "+str(totalF1 / nb_folds * 100) +"%"], matrix
+        return max, matrix, str(totalAccuracy / nb_folds * 100)+"%", prf_table
+    
+    # ["Accuracy: "+str(totalAccuracy / nb_folds * 100)+"%",
+    #                  "Recall: "+ str(recall * 100) +"%",
+    #                  "Precision: "+str(precision * 100)+ "%",
+    #                  "F1-measure: "+str(f1 * 100) +"%"],
 
 
     def confusion_matrix(self, predicted, actual):
@@ -208,17 +212,17 @@ class Decision:
 
 
     def prf_metrics(self, matrix):      # calculate p(recesion), r(ecall), and f(1measure)
-        totalRecall, totalPrecision, totalF1 = 0, 0, 0
+        recalls, precisions, f1s = [], [], []
         for i in range(self.label_count):
             tp = matrix[i][i]
             totalRow = np.sum(matrix[i])
             totalCol = np.sum(matrix[:, i])
             recall = tp / totalRow
-            totalRecall += recall
+            recalls.append(recall)
             precision = tp / totalCol
-            totalPrecision += precision
-            totalF1 += 2 * precision * recall / (precision + recall)
-        return totalPrecision / self.label_count, totalRecall / self.label_count, totalF1 / self.label_count
+            precisions.append(precision) 
+            f1s.append(2 * precision * recall / (precision + recall))
+        return recalls, precisions, f1s
 
 # dt = Decision()
 # dt.load_data(noisyData)

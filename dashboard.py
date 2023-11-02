@@ -12,7 +12,8 @@ decision = dt.Decision()
 def index():
     print(request.form)
     room_nums = []
-    report = []
+    accuracy = None
+    prf_table = None
     conf = []
     graphs = []
     attrs = ["x"+str(i) for i in range(7)]    
@@ -31,11 +32,11 @@ def index():
    
         if decision.all_data is not None:
             if request.form.get("cross"):
-                mt, report, confmat = decision.cross_validation()
-                th = ["Actl/Pred"]+[str(i+1) for i in range(decision.label_count)]
+                mt, confmat, accuracy, prf_table = decision.cross_validation()
+                th = ["Actl./Pred."]+["P. Room "+str(i+1) for i in range(decision.label_count)]
                 conf.append(th)
                 for i in range(decision.label_count):
-                    tr = [str(i+1)]
+                    tr = ["A. Room "+str(i+1)]
                     for v in confmat[i]:
                         tr.append(str(int(v)))
                     conf.append(tr)
@@ -66,7 +67,7 @@ def index():
                 room_nums = dt.predict(decision.decision_tree, data_predict)
 
     return render_template('index.html', graphs=graphs, decision=decision, 
-                           attrs=attrs, room_nums=room_nums, report=report, conf=conf)
+                           attrs=attrs, room_nums=room_nums, prf=prf_table, accuracy=accuracy, conf=conf)
 
 @app.route('/graphs', methods=['GET', 'POST'])  # graphic history page
 def graphs():

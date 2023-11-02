@@ -24,7 +24,7 @@ class ValueInfo:
         return self.unique
 
 
-class OptimumFinder:    # the object storing the cumulative sum of label frequency and entropy for each value
+class OptimumFinder:    # the object storing the cumulative sum of label frequency and calculating entropy for each value
     def __init__(self, size, prefix_freq):
         self.size = size
         self.prefix_freq = prefix_freq
