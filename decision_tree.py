@@ -182,19 +182,13 @@ class Decision:
                 max = (curr_acc, tree)
                 
         precisions, recalls, f1s = self.prf_metrics(matrix)
-        prf_table = [[""]+["Room "+str(i+1) for i in range(self.label_count)],
-               ["Recall"]+[str(recall * 100) +"%" for recall in recalls],
-               ["Precision"]+[str(precision * 100) +"%" for precision in precisions],
-               ["F1-measure"]+[str(f1 * 100) +"%" for f1 in f1s]]
+        prf_table = [["", "Recall", "Precision", "F1-measure"]]+[
+            ["Room "+str(i+1), str(recalls[i] * 100) +"%", str(precisions[i] * 100) +"%", str(f1s[i] * 100) +"%" ]
+            for i in range(self.label_count)]
+
         # Return the decision tree with highest accuracy, averaged evaluation metrics, and confusion matrix
         return max, matrix, str(totalAccuracy / nb_folds * 100)+"%", prf_table
-    
-    # ["Accuracy: "+str(totalAccuracy / nb_folds * 100)+"%",
-    #                  "Recall: "+ str(recall * 100) +"%",
-    #                  "Precision: "+str(precision * 100)+ "%",
-    #                  "F1-measure: "+str(f1 * 100) +"%"],
-
-
+ 
     def confusion_matrix(self, predicted, actual):
         matrix = np.zeros((self.label_count, self.label_count))
         for i in range(len(actual)):
