@@ -24,11 +24,11 @@
 </head>
 
 <body>
-    <h1>Decision tree visualization history</h1>
     <form action="/graphs" method="post">
-        <input type="submit" name="clear" value="Clear graphic history"><br>
+      <h1>{{mode}} visualization history <input type="submit" name="clear" value="Clear graphic history"></h1>
     </form>
     <div class="row" style="background-color: lightgreen;">
+        {% if mode=="Decision tree" %}
         <div class="column">
             {% for h1 in history1 %}
             Decision Tree {{h1[1][-5]}} for <b>{{h1[0]}}</b> -- {{h1[1]}}<br>
@@ -41,4 +41,17 @@
             <img src="static/plots/{{h2[1]}}" alt="Tree visualization" width="500" height="400"><br>
             {% endfor %}
         </div>
+        {% endif %}
+        {% if mode=="Dataset" %}
+        <div class="column">
+          {% for h1 in history1 %}
+          <img src="{{h1}}" alt="Data visualization" width="500" height="400"><br>
+          {% endfor %}
+        </div>
+        <div class="column">
+            {% for h2 in history2 %}
+            <img src="{{h2}}" alt="Data visualization" width="500" height="400"><br>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>

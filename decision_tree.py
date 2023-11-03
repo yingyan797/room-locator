@@ -181,9 +181,11 @@ class Decision:
             if curr_acc >= max[0]:
                 max = (curr_acc, tree)
                 
+        matrix /= nb_folds
+
         precisions, recalls, f1s = self.prf_metrics(matrix)
-        prf_table = [["", "Recall", "Precision", "F1-measure"]]+[
-            ["Room "+str(i+1), str(recalls[i] * 100) +"%", str(precisions[i] * 100) +"%", str(f1s[i] * 100) +"%" ]
+        prf_table = [["", "Precision", "Recall", "F1-measure"]]+[
+            ["Room "+str(i+1), str(precisions[i] * 100) +"%", str(recalls[i] * 100) +"%", str(f1s[i] * 100) +"%" ]
             for i in range(self.label_count)]
 
         # Return the decision tree with highest accuracy, averaged evaluation metrics, and confusion matrix
@@ -216,7 +218,7 @@ class Decision:
             precision = tp / totalCol
             precisions.append(precision) 
             f1s.append(2 * precision * recall / (precision + recall))
-        return recalls, precisions, f1s
+        return precisions, recalls, f1s
 
 # dt = Decision()
 # dt.load_data(noisyData)

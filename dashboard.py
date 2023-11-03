@@ -1,12 +1,19 @@
 from flask import Flask, render_template, request
 import decision_tree as dt
 import numpy as np
-from visualization import Tree_Visualizer
+from visualization import Tree_Visualizer, Wifi_Visualizer
 import os
 import glob
 
 app = Flask(__name__)
 decision = dt.Decision()
+
+class History:
+    def __init__(self, mode):
+        self.mode = mode
+
+graphic_history = History("")
+
 
 @app.route('/', methods=['GET', 'POST'])    # main page
 def index():
@@ -16,13 +23,13 @@ def index():
     prf_table = None
     conf = []
     graphs = []
+    wifi_visual = None
     attrs = ["x"+str(i) for i in range(7)]    
     file = request.form.get("dataset")
     if request.form.get("reselect"):
         decision.__init__()
         file = ""
     else:
-        print(file)            
         if file == "clean":
             decision.load_data(dt.cleanData)
         elif file == "noisy":
@@ -31,6 +38,13 @@ def index():
             decision.load_data("wifi_db/"+file)
    
         if decision.all_data is not None:
+            if request.form.get("plotdata"):
+                wifivs = Wifi_Visualizer(decision)
+                wifi_visual = wifivs.plot_dataset()
+            elif request.form.get("clear_wdp"):
+                files = glob.glob('static/wifi_visual/*')
+                for f in files:
+                    os.remove(f)
             if request.form.get("cross"):
                 mt, confmat, accuracy, prf_table = decision.cross_validation()
                 th = ["Actl./Pred."]+["P. Room "+str(i+1) for i in range(decision.label_count)]
@@ -38,7 +52,7 @@ def index():
                 for i in range(decision.label_count):
                     tr = ["A. Room "+str(i+1)]
                     for v in confmat[i]:
-                        tr.append(str(int(v)))
+                        tr.append(str(v))
                     conf.append(tr)
             elif request.form.get("decision"):
                 decision.fit()
@@ -66,20 +80,28 @@ def index():
             if data_predict is not None:
                 room_nums = dt.predict(decision.decision_tree, data_predict)
 
-    return render_template('index.html', graphs=graphs, decision=decision, 
+    return render_template('index.html', graphs=graphs, decision=decision, wifi_visual=wifi_visual,
                            attrs=attrs, room_nums=room_nums, prf=prf_table, accuracy=accuracy, conf=conf)
 
-@app.route('/graphs', methods=['GET', 'POST'])  # graphic history page
+@app.route('/graphs', methods=['GET', 'POST'])  # decision tree graphic history page
 def graphs():
     print(request.form)
     history1 = []
     history2 = []
     if request.form.get("clear"):
-        files = glob.glob('static/plots/*')
-        for f in files:
-            os.remove(f)
-        open("graphdb.csv", "w").write("")
-    else:
+        if graphic_history.mode == "Decision tree":
+            files = glob.glob('static/plots/*')
+            for f in files:
+                os.remove(f)
+            open("graphdb.csv", "w").write("")
+        else:
+            files = glob.glob('static/wifi_visual/*')
+            if request.form.get("clear"):
+                for f in files:
+                    os.remove(f)
+
+    elif request.form.get("graphdt"):
+        graphic_history.mode = "Decision tree"
         f = open("graphdb.csv", "r")
         left = True
         while True:
@@ -95,9 +117,21 @@ def graphs():
                     left = True
             else:
                 break
-    return render_template('graphs.html', history1=history1, history2=history2)
+    elif request.form.get("graphdata"):
+        graphic_history.mode = "Dataset"
+        left = True
+        files = glob.glob('static/wifi_visual/*')
+        for f in files:
+            if left:
+                history1.append(f)
+                left = False
+            else:
+                history2.append(f)
+                left = True
+            
+    return render_template('graphs.html', mode=graphic_history.mode, history1=history1, history2=history2)
 
-def get_session():
+def get_session():      # For naming decision tree graphs
     f = open("graphdb.csv", "r")
     lines = f.readlines()
     f.close()
@@ -117,6 +151,7 @@ def get_session():
         return int(num)
     
     return int(num)+1
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

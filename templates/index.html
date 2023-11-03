@@ -33,11 +33,17 @@
 
     <div class="column" style="background-color: lightblue;">
         <h2>Select sample dataset to train the model</h2>
-        <form name="data" action="/" method="post">
+        <form id="history" action="/graphs" target="_blank" method="post"></form>
+        <form action="/" method="post">
             <b>Clean dataset</b><input type="radio" name="dataset" value="clean">
             <b>; Noisy dataset</b><input type="radio" name="dataset" value="noisy"><br>
             Or upload new dataset (.txt, from "wifi_db" directory): <input type="file" name="dataset" accept=".txt" dirname="static"><br><br>
-            See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
+            Visualize dataset <input type="submit" name="plotdata" value="Draw dataset in 2D">
+            <input form="history" type="submit" name="graphdata" value="View graphic history">
+            {% if wifi_visual %}
+            <img src="{{wifi_visual}}" alt="dataset plot">
+            {% endif %}
+            <br>See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
             {% if conf %}
             <b>-- Confusion Matrix --</b>
             <table>
@@ -99,10 +105,10 @@
 
     </div>
     <div class="column" style="background-color: lightgoldenrodyellow;">
-        <h2>Visualize decision tree</h2>
         <form action="/" method="post">
+            <h2>Visualize decision tree 
             <input type="submit" name="visualization" value="Draw decision tree">
-            <a href="/graphs" target="_blank">View graphic history</a>
+            <input form="history" type="submit" name="graphdt" value="View graphic history"></h2>
          </form>
         {% if graphs %}
             {% for gname in graphs %}

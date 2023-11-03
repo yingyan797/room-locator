@@ -1,5 +1,39 @@
+import matplotlib
+matplotlib.use("agg")
 import matplotlib.pyplot as plt
 import numpy as np
+
+class Wifi_Visualizer:
+    def __init__(self, decision):
+        self.attr = decision.attr_count
+        self.data_name = decision.data_name[8:-4]
+        self.all_data = decision.all_data
+        self.ref_vector = np.array([1]+[0 for i in range(self.attr-1)])
+        self.colors = ['b', 'g', 'r', 'm']
+    
+    def polar_coord(self, row): # transform each row of dataset to 2D polar coordinate
+        d = 0
+        for x in row[:-1]:
+            d += x*x
+        dist = np.sqrt(d)
+        ang = np.dot(self.ref_vector, row[:-1])/dist
+        return dist, ang, row[-1]
+    
+    def plot_dataset(self):
+        ds = [[] for i in range(4)]
+        angs = [[] for i in range(4)]
+        for row in self.all_data:
+            d,a,l = self.polar_coord(row)
+            ds[int(l)-1].append(d)
+            angs[int(l)-1].append(a)
+        fn = "static/wifi_visual/"+self.data_name
+        plt.title(self.data_name+" in polar coordinate")
+        plt.xlabel("Vector norm")
+        plt.ylabel("Polar angle cosine")
+        for i in range(4):
+            plt.scatter(ds[i], angs[i], c=self.colors[i])
+        plt.savefig(fn)
+        return fn+".png"
 
 class Tree_Visualizer:
     def __init__(self, my_tree):
@@ -31,10 +65,9 @@ class Tree_Visualizer:
                 self.plot_tree(node.right, level - 1, position + 2 ** level / 10, (node.x, node.y))
 
     def visualize(self, session_num, data_name):
-        # Configure plot
         graphs = []
-        f = open("graphdb.csv", "a")    
-        # The database for recording the dataset from which each decision tree plot is generated
+        f = open("graphdb.csv", "a")    # The database for decision tree graph names
+        # Congigure plots
         fig, ax = plt.subplots(figsize=(30, 30))
         plt.axis('off')
         ax.set_aspect('equal')
