@@ -10,6 +10,7 @@ class Wifi_Visualizer:
         self.all_data = decision.all_data
         self.ref_vector = np.array([1]+[0 for i in range(self.attr-1)])
         self.colors = ['b', 'g', 'r', 'm']
+        self.markers = ["+", "<", ".", "*"]
     
     def polar_coord(self, row): # transform each row of dataset to 2D polar coordinate
         d = 0
@@ -31,7 +32,7 @@ class Wifi_Visualizer:
         plt.xlabel("Vector norm")
         plt.ylabel("Polar angle cosine")
         for i in range(4):
-            plt.scatter(ds[i], angs[i], c=self.colors[i])
+            plt.scatter(ds[i], angs[i], c=self.colors[i], marker=self.markers[i])
         plt.savefig(fn)
         return fn+".png"
 
