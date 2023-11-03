@@ -1,27 +1,25 @@
 import numpy as np
-from decision_tree import decision_tree_learning, cross_validation
+from decision_tree import Decision, cleanData, noisyData
 from visualization import Tree_Visualizer
 
 
 if __name__ == '__main__':
+    dt1 = Decision()
+    dt2 = Decision()
     # read dataset to np_array
     print("Loading the data:.......\n")
-    cleanData = np.loadtxt("wifi_db/clean_dataset.txt")
-    noisyData = np.loadtxt("wifi_db/noisy_dataset.txt")
-    data_shape = cleanData.shape
-    attr_count = data_shape[1] - 1
+    dt1.load_data(cleanData)
+    dt2.load_data(noisyData)
 
     print("Creating the decision tree according to the data.....\n")
     # print(find_optimal_split_point(cleanData))
-    tree, depth = decision_tree_learning(cleanData, 0, 10)
+    dt1.fit()
+    dt2.fit()
     # print(tree.show(), "depth", depth)
     print("Cross validating:.......... \n")
     print("Clean Data:\n")
-    acc, maxtree = cross_validation(cleanData)
+    mt, matrix, acc, table = dt1.cross_validation()
+    print(matrix, "\nAccuracy:", acc, "\nPrf metrics",table)
     print("Noisy Data:\n")
-    cross_validation(noisyData)
-
-    print("Visualizing tree and storing plot to plot..........\n")
-    tree_visualizer = Tree_Visualizer(tree)
-    tree_visualizer.visualize()
-
+    mt, matrix, acc, table = dt2.cross_validation()
+    print(matrix, "\nAccuracy:", acc, "\nPrf metrics",table)
