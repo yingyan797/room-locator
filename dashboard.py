@@ -45,6 +45,10 @@ def index():
                 files = glob.glob('static/wifi_visual/*')
                 for f in files:
                     os.remove(f)
+            prune_depth = request.form.get("prunedepth")
+            prune_pct = request.form.get("prunepct")
+            if prune_depth or prune_pct:
+                decision.apply_pruning(prune_depth, prune_pct)
             if request.form.get("cross"):
                 mt, confmat, accuracy, prf_table = decision.cross_validation()
                 th = ["Actl./Pred."]+["P. Room "+str(i+1) for i in range(decision.label_count)]

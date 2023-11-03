@@ -37,13 +37,20 @@
         <form action="/" method="post">
             <b>Clean dataset</b><input type="radio" name="dataset" value="clean">
             <b>; Noisy dataset</b><input type="radio" name="dataset" value="noisy"><br>
-            Or upload new dataset (.txt, from "wifi_db" directory): <input type="file" name="dataset" accept=".txt" dirname="static"><br><br>
-            Visualize dataset <input type="submit" name="plotdata" value="Draw dataset in 2D">
-            <input form="history" type="submit" name="graphdata" value="View graphic history">
+            Or upload new dataset (.txt, from "wifi_db" directory): <input type="file" name="dataset" accept=".txt" dirname="static"><br>
+            {% if decision.data_name %}
+            **Dataset for training: <b>{{decision.data_name}}</b><br><br>
+            {% endif %}
+            <b>Visualize datase </b><input type="submit" name="plotdata" value="Draw dataset in 2D">
+            <input form="history" type="submit" name="graphdata" value="View graphic history"><br>
             {% if wifi_visual %}
             <img src="{{wifi_visual}}" alt="dataset plot">
             {% endif %}
-            <br>See performance of decision tree algorithm <input type="submit" name="cross" value="Cross validation"><br>
+            <b>Decision tree pruning options:</b><br>
+            **Current pruning options -- Depth: <b>{{decision.prune_depth}}</b>; Dominant percentage: <b>{{decision.prune_pct}}%</b><br>
+            Depth limit: <input type="number" name="prunedepth" min="3" max="15">
+            Dominant label percentage: <input type="number" name="prunepct" min="50" max="100" step="0.01">%
+            <br><b>See performance of decision tree algorithm </b><input type="submit" name="cross" value="Cross validation"><br>
             {% if conf %}
             <b>-- Confusion Matrix --</b>
             <table>
@@ -78,15 +85,12 @@
                 {% endfor %}  
             </table>
             {% endif %}
+            {% if decision.decision_tree %}
+            **Decision tree has been constructed successfully for <b>{{decision.data_name}}</b><br>
+            {% endif %}
             <br><input type="submit" name="decision" value="Create decision tree">
-            <input type="submit" name="reselect" value="Reselect dataset"><br>
+            <input type="submit" name="reselect" value="Reset decision tree and training dataset"><br>
         </form>
-        {% if decision.data_name %}
-        Dataset for training: <b>{{decision.data_name}}</b><br>
-        {% if decision.decision_tree %}
-        **Decision tree has been constructed successfully!<br>
-        {% endif %}
-        {% endif %}
         <h2>Locate your receptor</h2>
         <form action="/" method="post">
             <b>Upload a file of signal values to predict </b>(.txt, from "predictions" directory): <input type="file" name="pred_file"><br>

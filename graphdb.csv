@@ -8,3 +8,6 @@
 0,wifi_db/clean_dataset.txt,subT7_0.png
 0,wifi_db/clean_dataset.txt,subT8_0.png
 0,wifi_db/clean_dataset.txt,subT9_0.png
+1,wifi_db/noisy_dataset.txt,mainT_1.png
+1,wifi_db/noisy_dataset.txt,subT1_1.png
+1,wifi_db/noisy_dataset.txt,subT2_1.png

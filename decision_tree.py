@@ -66,12 +66,24 @@ class Decision:
         self.all_data = None
         self.decision_tree = None
         self.data_name = None   # File name of input dataset
+        self.prune_depth = None
+        self.prune_pct = None
 
     def load_data(self, data_file):     # Read .txt data file into array and count the number labels
         self.data_name = data_file
         self.all_data = np.loadtxt(data_file)
         self.label_count = count_labels(self.all_data)
         self.attr_count = len(self.all_data[0]) - 1
+
+    def apply_pruning(self, depth, percentage):
+        if not depth:
+            self.prune_depth = 7
+        else:
+            self.prune_depth = int(depth)
+        if not percentage:
+            self.prune_pct = 95
+        else:
+            self.prune_pct = float(percentage)
 
     def find_optimal_split_point(self, dataset):
         min_remainder = None  # The splitting option yielding minimum remainder entropy, meaning the maximum information gain
@@ -133,10 +145,22 @@ class Decision:
         return max_IG_attr, max_IG_split
 
     def decision_tree_learning(self, dataset, depth, maxdepth):
-        all_labels = dataset[:, -1]         # Get the column with all the labels
-        if np.all(all_labels == all_labels[0]) or depth > maxdepth:
-            # Checks if all the labels are the same or exceed max depth
-            return Node(None, all_labels[0], None, None), depth
+        label_freq = [0 for i in range(self.label_count)]
+        for label in dataset[:, -1]:
+            label_freq[int(label-1)] += 1
+        
+        dominant_pct = 0
+        dominant_label = 0
+        for i in range(len(label_freq)):
+            pct = label_freq[i]/len(dataset)
+            if pct > dominant_pct:
+                dominant_pct = pct
+                dominant_label = i+1
+              
+        if depth > maxdepth or dominant_pct == 1 or (
+            self.prune_depth and depth >= self.prune_depth and dominant_pct*100 >= self.prune_pct):
+            return Node(None, dominant_label, None, None), depth
+
         else:       # recursively find optimum splitting points for left and right subtrees
             attr, split = self.find_optimal_split_point(dataset)
             split_node = Node(attr, split, None, None)
