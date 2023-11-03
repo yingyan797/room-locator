@@ -54,6 +54,6 @@ Our program has 4 main functionalities, all accessible from the webpage:
 - Finally, push the "make predictions" button to display the room numbers
 
 # Pruning optimization
-- Our program enables customized pruning parameter selection, and users can input 2 vaules: Depth limit (the starting depth from which pruning is considered, allowed values 4 - 15), and Dominant label percentage limit (decision tree algorithm will stop when the subset of data has a dominating label reaching certain percentage, allowed value 50-100)
+- Our program enables customized pruning parameter selection, and users can input 2 vaules: Depth limit (the starting depth from which pruning is considered, allowed values 2 - 15), and Dominant label percentage limit (decision tree algorithm will stop when the subset of data has a dominating label reaching certain percentage, allowed value 50-100)
 - If only one value is entered, the other will be set to default (Depth 7 or Percentage 95)
 - To apply pruning on decision tree learning, simple enter the values in the boxes before cross validation or creating decision trees
